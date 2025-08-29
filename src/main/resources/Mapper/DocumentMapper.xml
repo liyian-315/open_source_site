@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdu.open.source.site.resposity.DocumentDao">
+
+    <select id="selectAll" parameterType="com.sdu.open.source.site.entity.Document" resultType="com.sdu.open.source.site.entity.Document">
+        select *
+        from document
+        <where>
+            <if test="arch != null and arch != ''">
+                arch = #{arch}
+            </if>
+            <if test="manufacturer != null and manufacturer != ''">
+                AND manufacturer = #{manufacturer}
+            </if>
+            <if test="series != null and series != ''">
+                AND series = #{series}
+            </if>
+        </where>
+    </select>
+</mapper>
