@@ -1,5 +1,6 @@
 package com.sdu.open.source.site.controller;
 
+import com.sdu.open.source.site.entity.Menu;
 import com.sdu.open.source.site.entity.Mirror;
 import com.sdu.open.source.site.service.MirrorService;
 import lombok.extern.slf4j.Slf4j;
@@ -30,5 +31,10 @@ public class MirrorController {
     @GetMapping("/mirrors")
     private List<Mirror> getMirrors() {
         return mirrorService.getMirrors();
+    }
+
+    @GetMapping("/mirrors_menu")
+    private List<Menu> getMirrorsMenu() {
+        return mirrorService.getMirrorsMenu();
     }
 }

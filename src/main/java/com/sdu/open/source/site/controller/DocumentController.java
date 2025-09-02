@@ -1,6 +1,7 @@
 package com.sdu.open.source.site.controller;
 
 import com.sdu.open.source.site.entity.Document;
+import com.sdu.open.source.site.entity.Menu;
 import com.sdu.open.source.site.service.DocumentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,17 @@ public class DocumentController {
     private DocumentService documentService;
 
     @Autowired
-    private void setDocumentService (DocumentService documentService){
+    private void setDocumentService(DocumentService documentService) {
         this.documentService = documentService;
     }
 
     @GetMapping("/docs")
-    public List<Document> getDocs(Document document){
+    public List<Document> getDocs(Document document) {
         return documentService.getDocs(document);
+    }
+
+    @GetMapping("/docs_menu")
+    public List<Menu> getDocsMenu() {
+        return documentService.getDocsMenu();
     }
 }

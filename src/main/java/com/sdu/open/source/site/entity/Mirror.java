@@ -9,4 +9,7 @@ public class Mirror {
     private String url;
     private String size;
     private String time;
+    private String arch;
+    private String manufacturer;
+    private String series;
 }
