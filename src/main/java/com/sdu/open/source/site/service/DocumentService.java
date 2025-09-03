@@ -1,7 +1,9 @@
 package com.sdu.open.source.site.service;
 
 import com.sdu.open.source.site.entity.Document;
-import com.sdu.open.source.site.resposity.DocumentDao;
+import com.sdu.open.source.site.entity.Menu;
+import com.sdu.open.source.site.repository.DocumentDao;
+import com.sdu.open.source.site.repository.DocumentMenuDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +19,23 @@ import java.util.List;
 public class DocumentService {
 
     private DocumentDao documentDao;
+    private DocumentMenuDao documentMenuDao;
 
     @Autowired
-    private void setDocumentDao(DocumentDao documentDao){
+    private void setDocumentDao(DocumentDao documentDao) {
         this.documentDao = documentDao;
+    }
+
+    @Autowired
+    private void setDocumentMenuDao(DocumentMenuDao documentMenuDao) {
+        this.documentMenuDao = documentMenuDao;
     }
 
     public List<Document> getDocs(Document document) {
         return documentDao.selectAll(document);
+    }
+
+    public List<Menu> getDocsMenu() {
+        return documentMenuDao.selectAll();
     }
 }

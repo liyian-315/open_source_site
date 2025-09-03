@@ -1,4 +1,4 @@
-package com.sdu.open.source.site.resposity;
+package com.sdu.open.source.site.repository;
 
 import com.sdu.open.source.site.entity.Document;
 import org.apache.ibatis.annotations.Mapper;
