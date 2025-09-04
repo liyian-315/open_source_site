@@ -77,7 +77,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.sdu.open.source.site.OpenSourceSiteApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
