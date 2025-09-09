@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdu.open.source.site.repository.UserDao">
+
+    <select id="findByUsername" parameterType="java.lang.String" resultType="com.sdu.open.source.site.entity.User">
+        select *
+        from user
+        where username = #{username}
+    </select>
+
+    <insert id="insert" parameterType="com.sdu.open.source.site.entity.User" useGeneratedKeys="true" keyProperty="id">
+        insert into user (username, password, email, role, enabled, create_time, update_time)
+        values (#{username}, #{password}, #{email}, #{role}, #{enabled}, #{createTime}, #{updateTime})
+    </insert>
+
+    <select id="findById" parameterType="java.lang.Long" resultType="com.sdu.open.source.site.entity.User">
+        select *
+        from user
+        where id = #{id}
+    </select>
+
+</mapper>

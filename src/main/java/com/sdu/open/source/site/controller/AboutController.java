@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,12 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class AboutController {
 
+    @Autowired
     private AboutService aboutService;
 
-    @Autowired
-    private void setAboutService(AboutService aboutService) {
-        this.aboutService = aboutService;
-    }
+//    @Autowired
+//    private void setAboutService(AboutService aboutService) {
+//        this.aboutService = aboutService;
+//    }
 
     @GetMapping("/about_text")
     public ResponseEntity<String> getAboutText(CopyWriting cw) {
