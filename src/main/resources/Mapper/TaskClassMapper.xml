@@ -6,4 +6,10 @@
         select *
         from task_class
     </select>
+
+    <select id="findById" resultType="TaskClass">
+        select *
+        from task_class
+        where id=#{id}
+    </select>
 </mapper>

@@ -8,4 +8,6 @@ import java.util.List;
 @Mapper
 public interface TaskClassDao {
     List<TaskClass> selectAll();
+
+    TaskClass findById(Long id);
 }
