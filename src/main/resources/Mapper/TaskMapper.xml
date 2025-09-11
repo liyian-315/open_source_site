@@ -40,4 +40,27 @@
             collection_user = #{collectionUser}
           AND task_status = #{taskStatus}
     </select>
+
+    <select id="findById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT *
+        FROM
+            task
+        WHERE
+            id = #{id}
+    </select>
+
+    <update id="update" parameterType="com.sdu.open.source.site.entity.Task">
+        update task
+        <set>
+            <include refid="sqlFragment"/>
+        </set>
+        where id = #{id}
+    </update>
+
+    <sql id="sqlFragment">
+        <if test="taskStatus != null">task_status = #{taskStatus},</if>
+        <if test="collectionUser != null">collection_user = #{collectionUser},</if>
+        <if test="collectionTime != null">collection_time = #{collectionTime},</if>
+        <if test="updateTime != null">update_time = #{updateTime}</if>
+    </sql>
 </mapper>

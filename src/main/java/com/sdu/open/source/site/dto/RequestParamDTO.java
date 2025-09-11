@@ -41,4 +41,6 @@ public class RequestParamDTO {
     @Pattern(regexp = "^$|^\\d{13,19}$",
             message = "银行卡号必须是13-19位数字")
     private String bankCardNumber;
+
+    private Long taskId;
 }
