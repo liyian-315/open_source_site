@@ -1,0 +1,111 @@
+package com.sdu.open.source.site.controller;
+
+import com.sdu.open.source.site.dto.ApiResponse;
+import com.sdu.open.source.site.dto.JwtRequest;
+import com.sdu.open.source.site.dto.JwtResponse;
+import com.sdu.open.source.site.dto.RegisterRequest;
+import com.sdu.open.source.site.entity.User;
+import com.sdu.open.source.site.security.JwtTokenUtil;
+import com.sdu.open.source.site.service.UserDetailsServiceImpl;
+import com.sdu.open.source.site.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * 认证控制器
+ */
+@RestController
+@RequestMapping("/api/auth")
+@Slf4j
+public class AuthController {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
+
+    @Autowired
+    private UserService userService;
+
+    /**
+     * 用户登录
+     *
+     * @param request 登录请求
+     * @return JWT响应
+     */
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody JwtRequest request) {
+        try {
+            authenticate(request.getUsername(), request.getPassword());
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+            final String token = jwtTokenUtil.generateToken(userDetails);
+            
+            User user = userService.findByUsername(request.getUsername());
+            return ResponseEntity.ok(ApiResponse.success(
+                    new JwtResponse(token, user.getUsername(), user.getRole())
+            ));
+        } catch (Exception e) {
+            log.error("登录失败", e);
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, "登录失败: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 用户注册
+     *
+     * @param request 注册请求
+     * @return 注册结果
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        try {
+            // 检查用户名是否已存在
+            if (userService.findByUsername(request.getUsername()) != null) {
+                return ResponseEntity.badRequest().body(ApiResponse.error(400, "用户名已存在"));
+            }
+            
+            // 创建新用户
+            User user = new User();
+            user.setUsername(request.getUsername());
+            user.setPassword(request.getPassword());
+            user.setEmail(request.getEmail());
+            
+            User createdUser = userService.createUser(user);
+            return ResponseEntity.ok(ApiResponse.success("注册成功", createdUser));
+        } catch (Exception e) {
+            log.error("注册失败", e);
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, "注册失败: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 认证用户
+     *
+     * @param username 用户名
+     * @param password 密码
+     * @throws Exception 认证异常
+     */
+    private void authenticate(String username, String password) throws Exception {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        } catch (DisabledException e) {
+            throw new Exception("用户已禁用", e);
+        } catch (BadCredentialsException e) {
+            throw new Exception("无效的凭据", e);
+        }
+    }
+}

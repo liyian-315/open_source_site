@@ -13,4 +13,8 @@ public class Menu {
     private Long id;
     private String level;
     private String title;
+    private String description;
+    private String url;
+    private String icon;
+    private Integer order;
 }
