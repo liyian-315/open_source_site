@@ -29,4 +29,6 @@ public interface UserDao {
      * @return 用户对象
      */
     User findById(Long id);
+
+    void update(User user);
 }

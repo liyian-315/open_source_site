@@ -4,6 +4,7 @@ import com.sdu.open.source.site.dto.ApiResponse;
 import com.sdu.open.source.site.dto.JwtRequest;
 import com.sdu.open.source.site.dto.JwtResponse;
 import com.sdu.open.source.site.dto.RegisterRequest;
+import com.sdu.open.source.site.dto.RequestParamDTO;
 import com.sdu.open.source.site.entity.User;
 import com.sdu.open.source.site.security.JwtTokenUtil;
 import com.sdu.open.source.site.service.UserDetailsServiceImpl;
@@ -16,10 +17,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 认证控制器
@@ -106,6 +104,41 @@ public class AuthController {
             throw new Exception("用户已禁用", e);
         } catch (BadCredentialsException e) {
             throw new Exception("无效的凭据", e);
+        }
+    }
+
+    @PostMapping("/personInfo")
+    public ResponseEntity<?> getPersonInfo(@RequestBody RequestParamDTO param) throws Exception {
+        try {
+            String username = param.getUsername();
+            User user = userService.findByUsername(username);
+            if (user == null) {
+                log.warn("获取用户个人信息失败：用户名 [{}] 不存在", username);
+                return ResponseEntity.ok(ApiResponse.error(404, "用户不存在"));
+            }
+            return ResponseEntity.ok(ApiResponse.success(user));
+        } catch (Exception e) {
+            log.error("获取用户个人信息系统异常，用户名：{}", param.getUsername(), e);
+            return ResponseEntity.ok(ApiResponse.error(500, "获取个人信息失败，请稍后重试"));
+        }
+    }
+
+    @PutMapping("/updatePersonInfo")
+    public ResponseEntity<?> updatePersonInfo(@RequestBody RequestParamDTO param) throws Exception {
+        try {
+            User user = userService.findByUsername(param.getUsername());
+            if (user == null) {
+                log.warn("更新用户信息失败，用户不存在: {}", param.getUsername());
+                return ResponseEntity.ok(ApiResponse.error(404, "用户不存在"));
+            }
+
+            userService.updateUserByParam(param);
+
+            return ResponseEntity.ok(ApiResponse.success(null, "个人信息更新成功"));
+
+        } catch (Exception e) {
+            log.error("更新用户信息异常，用户名: {}", param.getUsername(), e);
+            return ResponseEntity.ok(ApiResponse.error(500, "更新个人信息失败，请稍后重试"));
         }
     }
 }

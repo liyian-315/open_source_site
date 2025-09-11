@@ -1,5 +1,6 @@
 package com.sdu.open.source.site.service;
 
+import com.sdu.open.source.site.dto.RequestParamDTO;
 import com.sdu.open.source.site.entity.User;
 import com.sdu.open.source.site.repository.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,5 +76,27 @@ public class UserService {
             return false;
         }
         return passwordEncoder.matches(password, user.getPassword());
+    }
+
+    public void updateUserByParam(RequestParamDTO param) {
+        User user = new User();
+        user.setUsername(param.getUsername());
+        if (param.getEmail2() != null) {
+            user.setEmail2(param.getEmail2());
+        }
+        if (param.getPhone() != null) {
+            user.setPhone(param.getPhone());
+        }
+        if (param.getCompany() != null) {
+            user.setCompany(param.getCompany());
+        }
+        if (param.getAddress() != null) {
+            user.setAddress(param.getAddress());
+        }
+        if (param.getBankCardNumber() != null) {
+            user.setBankCardNumber(param.getBankCardNumber());
+        }
+        user.setUpdateTime(LocalDateTime.now().format(formatter));
+        userDao.update(user);
     }
 }

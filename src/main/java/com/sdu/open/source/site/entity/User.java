@@ -13,6 +13,12 @@ public class User {
     private String email;
     private String role;
     private Boolean enabled;
+    private String fullname;
+    private String email2;
+    private String phone;
+    private String company;
+    private String address;
+    private String bankCardNumber;
     private String createTime;
     private String updateTime;
 }

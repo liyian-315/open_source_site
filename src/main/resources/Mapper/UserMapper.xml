@@ -19,4 +19,21 @@
         where id = #{id}
     </select>
 
+
+    <sql id="sqlFragment">
+        <if test="email2 != null">email2 = #{email2},</if>
+        <if test="phone != null">phone = #{phone},</if>
+        <if test="company != null">company = #{company},</if>
+        <if test="address != null">address = #{address},</if>
+        <if test="bankCardNumber != null">bank_card_number = #{bankCardNumber},</if>
+        <if test="updateTime != null">update_time = #{updateTime}</if>
+</sql>
+
+    <update id="update" parameterType="com.sdu.open.source.site.entity.User">
+        update user
+        <set>
+            <include refid="sqlFragment"/>
+        </set>
+        where username = #{username}
+    </update>
 </mapper>
