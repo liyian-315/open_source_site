@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdu.open.source.site.repository.TaskDao">
+
+    <!-- 通用结果集映射 -->
+    <resultMap id="BaseResultMap" type="com.sdu.open.source.site.entity.Task">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="task_name" property="taskName" jdbcType="VARCHAR"/>
+        <result column="task_class" property="taskClass" jdbcType="BIGINT"/>
+        <result column="task_description" property="taskDescription" jdbcType="LONGVARCHAR"/>
+        <result column="task_status" property="taskStatus" jdbcType="INTEGER"/>
+        <result column="collection_user" property="collectionUser" jdbcType="VARCHAR"/>
+        <result column="collection_time" property="collectionTime" jdbcType="TIMESTAMP"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 根据领取人姓名查询任务 -->
+    <select id="findByCollectionUser" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT *
+        FROM
+            task
+        WHERE
+            collection_user = #{collectionUser}
+    </select>
+
+    <!-- 根据任务分类id查询任务 -->
+    <select id="findByTaskClass" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT *
+        FROM
+            task
+        WHERE
+            task_class = #{taskClass}
+    </select>
+
+    <select id="userTaskCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM task
+        WHERE
+            collection_user = #{collectionUser}
+          AND task_status = #{taskStatus}
+    </select>
+</mapper>
