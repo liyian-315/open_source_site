@@ -157,7 +157,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/getPdfCW")
+    @GetMapping("/public/getPdfCW")
     public ResponseEntity<?> getPdfCW(@RequestParam("area") String param) throws Exception {
         try {
             if (param == null) {
