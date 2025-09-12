@@ -1,13 +1,14 @@
 package com.sdu.open.source.site.controller;
 
+import com.sdu.open.source.site.entity.Document;
 import com.sdu.open.source.site.entity.Menu;
 import com.sdu.open.source.site.entity.Mirror;
 import com.sdu.open.source.site.service.MirrorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,9 +29,19 @@ public class MirrorController {
         this.mirrorService = mirrorService;
     }
 
-    @GetMapping("/mirrors")
-    private List<Mirror> getMirrors() {
-        return mirrorService.getMirrors();
+    @PostMapping("/mirrors")
+    private ResponseEntity<?> getMirrors(@RequestBody Mirror mirror) throws Exception {
+        try {
+            List<Mirror> mirrors = mirrorService.getMirrors(mirror);
+            if (mirrors == null || mirrors.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(mirrors, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/mirrors_menu")

@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -33,6 +34,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+
+        String[] publicUrls = {"/api/auth/**", "/api/public/**"};
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        String requestUri = request.getRequestURI();
+
+        boolean isPublicUrl = false;
+        for (String publicUrl : publicUrls) {
+            if (pathMatcher.match(publicUrl, requestUri)) {
+                isPublicUrl = true;
+                break;
+            }
+        }
+        if (isPublicUrl) {
+            chain.doFilter(request, response); // 直接放行，跳过后续 Token 检查
+            return;
+        }
 
         final String requestTokenHeader = request.getHeader("Authorization");
 

@@ -7,5 +7,5 @@ import java.util.List;
 
 @Mapper
 public interface MirrorDao {
-    List<Mirror> selectAll();
+    List<Mirror> selectAll(Mirror mirror);
 }

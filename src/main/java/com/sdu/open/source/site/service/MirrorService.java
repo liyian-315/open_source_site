@@ -31,8 +31,8 @@ public class MirrorService {
         this.mirrorMenuDao = mirrorMenuDao;
     }
 
-    public List<Mirror> getMirrors() {
-        return mirrorDao.selectAll();
+    public List<Mirror> getMirrors(Mirror mirror) {
+        return mirrorDao.selectAll(mirror);
     }
 
     public List<Menu> getMirrorsMenu() {
