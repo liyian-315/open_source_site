@@ -9,8 +9,8 @@
     </select>
 
     <insert id="insert" parameterType="com.sdu.open.source.site.entity.User" useGeneratedKeys="true" keyProperty="id">
-        insert into user (username, password, email, role, enabled, create_time, update_time)
-        values (#{username}, #{password}, #{email}, #{role}, #{enabled}, #{createTime}, #{updateTime})
+        insert into user (username, password, email, role, enabled, fullname, company, address, create_time, update_time, has_signed_pdf)
+        values (#{username}, #{password}, #{email}, #{role}, #{enabled},#{fullname}, #{company}, #{address}, #{createTime}, #{updateTime}, #{hasSignedPdf})
     </insert>
 
     <select id="findById" parameterType="java.lang.Long" resultType="com.sdu.open.source.site.entity.User">

@@ -1,5 +1,6 @@
 package com.sdu.open.source.site.repository;
 
+import com.sdu.open.source.site.entity.CopyWriting;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -11,4 +12,6 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface CopyWritingDao {
     String selectCopyWritingTextByArea(String area);
+
+    CopyWriting selectByArea(String area);
 }

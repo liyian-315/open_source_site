@@ -5,12 +5,15 @@ import com.sdu.open.source.site.dto.JwtRequest;
 import com.sdu.open.source.site.dto.JwtResponse;
 import com.sdu.open.source.site.dto.RegisterRequest;
 import com.sdu.open.source.site.dto.RequestParamDTO;
+import com.sdu.open.source.site.entity.CopyWriting;
 import com.sdu.open.source.site.entity.User;
 import com.sdu.open.source.site.security.JwtTokenUtil;
+import com.sdu.open.source.site.service.CopyWritingService;
 import com.sdu.open.source.site.service.UserDetailsServiceImpl;
 import com.sdu.open.source.site.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
  * 认证控制器
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api")
 @Slf4j
 public class AuthController {
 
@@ -39,19 +42,26 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    private CopyWritingService copyWritingService;
+
+    @Autowired
+    public void setCopyWritingService(CopyWritingService copyWritingService) {
+        this.copyWritingService = copyWritingService;
+    }
+
     /**
      * 用户登录
      *
      * @param request 登录请求
      * @return JWT响应
      */
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody JwtRequest request) {
         try {
             authenticate(request.getUsername(), request.getPassword());
             final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
             final String token = jwtTokenUtil.generateToken(userDetails);
-            
+
             User user = userService.findByUsername(request.getUsername());
             return ResponseEntity.ok(ApiResponse.success(
                     new JwtResponse(token, user.getUsername(), user.getRole())
@@ -68,20 +78,25 @@ public class AuthController {
      * @param request 注册请求
      * @return 注册结果
      */
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             // 检查用户名是否已存在
             if (userService.findByUsername(request.getUsername()) != null) {
                 return ResponseEntity.badRequest().body(ApiResponse.error(400, "用户名已存在"));
             }
-            
+
             // 创建新用户
             User user = new User();
             user.setUsername(request.getUsername());
             user.setPassword(request.getPassword());
             user.setEmail(request.getEmail());
-            
+            user.setEmail2(request.getEmail2());
+            user.setFullname(request.getFullname());
+            user.setPhone(request.getPhone());
+            user.setAddress(request.getAddress());
+            user.setCompany(request.getCompany());
+
             User createdUser = userService.createUser(user);
             return ResponseEntity.ok(ApiResponse.success("注册成功", createdUser));
         } catch (Exception e) {
@@ -139,6 +154,21 @@ public class AuthController {
         } catch (Exception e) {
             log.error("更新用户信息异常，用户名: {}", param.getUsername(), e);
             return ResponseEntity.ok(ApiResponse.error(500, "更新个人信息失败，请稍后重试"));
+        }
+    }
+
+    @GetMapping("/getPdfCW")
+    public ResponseEntity<?> getPdfCW(@RequestParam("area") String param) throws Exception {
+        try {
+            if (param == null) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            CopyWriting cw = copyWritingService.getCwByArea(param);
+
+            return new ResponseEntity<>(cw, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return ResponseEntity.ok(ApiResponse.error(500, "获取协议失败，请稍后重试"));
         }
     }
 }

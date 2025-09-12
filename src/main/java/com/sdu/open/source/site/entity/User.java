@@ -21,4 +21,5 @@ public class User {
     private String bankCardNumber;
     private String createTime;
     private String updateTime;
+    private Boolean hasSignedPdf;
 }

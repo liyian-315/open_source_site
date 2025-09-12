@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Version: 1.0
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/public")
 @Slf4j
 public class AboutController {
 

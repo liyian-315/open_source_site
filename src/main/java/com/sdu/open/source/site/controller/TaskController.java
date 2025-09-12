@@ -28,6 +28,7 @@ public class TaskController {
     public void setTaskService(TaskService taskService) {
         this.taskService = taskService;
     }
+
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
@@ -53,7 +54,7 @@ public class TaskController {
             if (tasks == null || tasks.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            for(Task task : tasks) {
+            for (Task task : tasks) {
                 task.setTaskClassName(taskService.getClassNameById(task.getTaskClass()).getName());
             }
             return new ResponseEntity<>(tasks, HttpStatus.OK);
@@ -94,6 +95,7 @@ public class TaskController {
 
     /**
      * 领取任务
+     *
      * @param param
      * @return
      * @throws Exception
@@ -114,6 +116,9 @@ public class TaskController {
             if (user == null) {
                 log.warn("任务领取失败，用户不存在: {}", username);
                 return ResponseEntity.ok(ApiResponse.error(404, "用户不存在"));
+            }
+            if (!user.getHasSignedPdf()) {
+                return ResponseEntity.ok(ApiResponse.error(400, "用户未签署协议"));
             }
 
             // 验证任务是否存在
