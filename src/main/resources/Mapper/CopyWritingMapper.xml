@@ -7,4 +7,10 @@
         from copy_writing
         where area = #{area}
     </select>
+
+    <select id="selectByArea" parameterType="string" resultType="com.sdu.open.source.site.entity.CopyWriting">
+        select *
+        from copy_writing
+        where area = #{area}
+    </select>
 </mapper>

@@ -43,22 +43,26 @@ public class UserService {
     public User createUser(User user) {
         // 加密密码
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        
+
         // 设置默认角色
         if (user.getRole() == null || user.getRole().isEmpty()) {
             user.setRole("ROLE_USER");
         }
-        
+
         // 设置账号状态
         if (user.getEnabled() == null) {
             user.setEnabled(true);
         }
-        
+
+        if (user.getHasSignedPdf() == null) {
+            user.setHasSignedPdf(false);
+        }
+
         // 设置创建和更新时间
         LocalDateTime now = LocalDateTime.now();
         user.setCreateTime(now.format(formatter));
         user.setUpdateTime(now.format(formatter));
-        
+
         userDao.insert(user);
         return user;
     }
