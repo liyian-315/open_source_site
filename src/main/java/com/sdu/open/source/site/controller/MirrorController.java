@@ -19,7 +19,7 @@ import java.util.List;
  * @Version: 1.0
  */
 @RestController
-@RequestMapping("/api/public")
+@RequestMapping("/api")
 @Slf4j
 public class MirrorController {
     private MirrorService mirrorService;
