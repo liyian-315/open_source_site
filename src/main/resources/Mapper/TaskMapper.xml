@@ -16,21 +16,22 @@
     </resultMap>
 
     <!-- 根据领取人姓名查询任务 -->
-    <select id="findByCollectionUser" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <select id="findByCollectionUser" parameterType="map" resultMap="BaseResultMap">
         SELECT *
         FROM
             task
         WHERE
             collection_user = #{collectionUser}
+        LIMIT #{offset}, #{pageSize}
     </select>
 
-    <!-- 根据任务分类id查询任务 -->
-    <select id="findByTaskClass" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <select id="findByTaskClass" parameterType="map" resultMap="BaseResultMap">
         SELECT *
         FROM
             task
         WHERE
             task_class = #{taskClass}
+        LIMIT #{offset}, #{pageSize}
     </select>
 
     <select id="userTaskCount" resultType="java.lang.Integer">
@@ -63,4 +64,20 @@
         <if test="collectionTime != null">collection_time = #{collectionTime},</if>
         <if test="updateTime != null">update_time = #{updateTime}</if>
     </sql>
+
+    <select id="countTasksByCategoryId" resultType="java.lang.Long">
+        select count(*)
+        from task
+        <where>
+            task_class = #{categoryId}
+        </where>
+    </select>
+
+    <select id="countTasksByCollectionUser" resultType="java.lang.Long">
+        select count(*)
+        from task
+        <where>
+            collection_user = #{user}
+        </where>
+    </select>
 </mapper>

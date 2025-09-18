@@ -96,6 +96,7 @@ public class AuthController {
             user.setPhone(request.getPhone());
             user.setAddress(request.getAddress());
             user.setCompany(request.getCompany());
+            user.setHasSignedPdf(true);
 
             User createdUser = userService.createUser(user);
             return ResponseEntity.ok(ApiResponse.success("注册成功", createdUser));

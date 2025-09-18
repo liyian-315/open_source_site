@@ -1,13 +1,13 @@
-package com.sdu.open.source.site.entity;
+package com.sdu.open.source.site.vo;
 
 import lombok.Data;
 
 @Data
-public class Task {
-    private Long id; // 主键自增 id
+public class TaskVO {
+    private Long id;
     private String taskName; // 任务名称
-    private Long taskClass; // 任务分类 id
-    private Long taskProtocolId; // 任务协议id
+    private String taskProtocolTitle; // 任务协议标题
+    private String taskProtocolLink; // 任务协议链接
     private String taskClassName; // 分类名
     private String taskDescription; // 任务详细描述
     private Integer taskStatus; // 任务状态，1 - 待领取，2 - 已领取，3 - 已完成
