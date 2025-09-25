@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdu.open.source.site.repository.EventMetaDao">
+
+    <resultMap id="TypeVOMap" type="com.sdu.open.source.site.dto.TypeVO">
+        <result property="code" column="code"/>
+        <result property="label" column="label"/>
+    </resultMap>
+
+    <select id="selectTypes" resultMap="TypeVOMap">
+        SELECT code, label
+        FROM event_type
+        WHERE enabled = 1
+        ORDER BY sort ASC, code ASC
+    </select>
+
+    <select id="selectHotTags" resultType="string">
+        SELECT name
+        FROM event_tag
+        WHERE enabled = 1 AND is_hot = 1
+        ORDER BY sort ASC, id ASC
+    </select>
+
+</mapper>

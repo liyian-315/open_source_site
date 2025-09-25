@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdu.open.source.site.repository.EventTemplateDao">
+
+    <resultMap id="EventTemplateMap" type="com.sdu.open.source.site.entity.EventTemplate">
+        <id     property="id"      column="id"/>
+        <result property="name"    column="name"/>
+        <result property="blocks"  column="blocks"/>
+        <result property="enabled" column="enabled"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <select id="selectById" parameterType="string" resultMap="EventTemplateMap">
+        SELECT id, name, blocks, enabled, version
+        FROM event_template
+        WHERE id = #{id}
+    </select>
+
+</mapper>

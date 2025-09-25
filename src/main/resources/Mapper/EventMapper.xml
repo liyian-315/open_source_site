@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdu.open.source.site.repository.EventDao">
+
+    <resultMap id="BaseResultMap" type="com.sdu.open.source.site.entity.Event">
+        <id column="id" property="id"/>
+        <result column="slug" property="slug"/>
+        <result column="title" property="title"/>
+        <result column="summary" property="summary"/>
+        <result column="cover_url" property="coverUrl"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="city" property="city"/>
+        <result column="location" property="location"/>
+        <result column="online" property="online"/>
+        <result column="tags" property="tags"/>
+        <result column="template_id" property="templateId"/>
+        <result column="blocks" property="blocks"/>
+        <result column="content_md" property="contentMd"/>
+        <result column="speakers" property="speakers"/>
+        <result column="agenda" property="agenda"/>
+        <result column="gallery" property="gallery"/>
+        <result column="cta_text" property="ctaText"/>
+        <result column="cta_url" property="ctaUrl"/>
+        <result column="seo" property="seo"/>
+        <result column="view_count" property="viewCount"/>
+
+        <!-- 新增：自定义跳转 -->
+        <result column="detail_url" property="detailUrl"/>
+        <result column="detail_is_external" property="detailIsExternal"/>
+    </resultMap>
+
+    <sql id="ListWhere">
+        <where>
+            <if test="q != null and q != ''">
+                <![CDATA[
+                (title like concat('%',#{q},'%') or summary like concat('%',#{q},'%'))
+                ]]>
+            </if>
+
+            <!-- types 判空/长度校验，避免 IN () -->
+            <if test="types != null">
+                AND type IN
+                <foreach collection="types" item="t" open="(" close=")" separator=",">#{t}</foreach>
+            </if>
+
+            <!-- tags 判空/长度校验 -->
+            <if test="tags != null">
+                AND (
+                <foreach collection="tags" item="tag" separator=" OR ">
+                    FIND_IN_SET(#{tag}, tags)
+                </foreach>
+                )
+            </if>
+
+            AND status = 2
+        </where>
+    </sql>
+
+    <select id="selectList" parameterType="map" resultMap="BaseResultMap">
+        SELECT *
+        FROM events
+        <include refid="ListWhere"/>
+        ORDER BY start_time DESC, id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countList" parameterType="map" resultType="int">
+        SELECT COUNT(1)
+        FROM events
+        <include refid="ListWhere"/>
+    </select>
+
+    <select id="selectBySlug" parameterType="string" resultMap="BaseResultMap">
+        SELECT *
+        FROM events
+        WHERE slug = #{slug}
+            LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.sdu.open.source.site.entity.Event" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO events(
+            slug, title, summary, cover_url, type, status, start_time, end_time, city, location, online, tags,
+            template_id, blocks, content_md, speakers, agenda, gallery, cta_text, cta_url, seo, view_count,
+            detail_url, detail_is_external
+        ) VALUES (
+                     #{slug}, #{title}, #{summary}, #{coverUrl}, #{type}, #{status}, #{startTime}, #{endTime}, #{city}, #{location}, #{online}, #{tags},
+                     #{templateId}, #{blocks}, #{contentMd}, #{speakers}, #{agenda}, #{gallery}, #{ctaText}, #{ctaUrl}, #{seo}, #{viewCount},
+                     #{detailUrl}, #{detailIsExternal}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.sdu.open.source.site.entity.Event">
+        UPDATE events
+        SET title = #{title},
+            summary = #{summary},
+            cover_url = #{coverUrl},
+            type = #{type},
+            status = #{status},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            city = #{city},
+            location = #{location},
+            online = #{online},
+            tags = #{tags},
+            template_id = #{templateId},
+            blocks = #{blocks},
+            content_md = #{contentMd},
+            speakers = #{speakers},
+            agenda = #{agenda},
+            gallery = #{gallery},
+            cta_text = #{ctaText},
+            cta_url = #{ctaUrl},
+            seo = #{seo},
+            view_count = #{viewCount},
+            detail_url = #{detailUrl},
+            detail_is_external = #{detailIsExternal},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>
