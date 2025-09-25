@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdu.open.source.site.repository.TagDao">
+
+    <select id="selectAll" resultType="com.sdu.open.source.site.entity.Tag">
+        select id, name
+        from tags
+    </select>
+
+    <select id="selectById" parameterType="java.lang.Long" resultType="com.sdu.open.source.site.entity.Tag">
+        select id, name
+        from tags
+        where id = #{id}
+    </select>
+
+    <select id="selectByProjectId" parameterType="java.lang.Long" resultType="com.sdu.open.source.site.entity.Tag">
+        select t.id, t.name
+        from tags t
+                 inner join project_tag pt on t.id = pt.tag_id
+        where pt.project_id = #{projectId}
+    </select>
+
+    <insert id="insert" parameterType="com.sdu.open.source.site.entity.Tag">
+        insert into tags (name)
+        values (#{name})
+    </insert>
+</mapper>
