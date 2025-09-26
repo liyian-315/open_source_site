@@ -1,5 +1,6 @@
 package com.sdu.open.source.site.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 /**
@@ -14,5 +15,8 @@ public class Project {
     private String name;
     private String description;
     private String createTime;
+    private String gitRepo;
+    private String projectIntro;
+    private JsonNode moduleDisplay;
 }
 

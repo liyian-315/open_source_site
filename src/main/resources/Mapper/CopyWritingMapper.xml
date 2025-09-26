@@ -13,4 +13,16 @@
         from copy_writing
         where area = #{area}
     </select>
+
+    <select id="selectListByArea" parameterType="java.lang.String" resultType="com.sdu.open.source.site.entity.CopyWriting">
+        select id,
+               area,
+               title,
+               copy_writing_text as copyWritingText,
+               link,
+               note
+        from copy_writing
+        where area = #{area}
+        order by id asc
+    </select>
 </mapper>
