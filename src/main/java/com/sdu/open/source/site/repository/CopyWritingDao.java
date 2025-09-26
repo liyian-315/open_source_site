@@ -2,6 +2,9 @@ package com.sdu.open.source.site.repository;
 
 import com.sdu.open.source.site.entity.CopyWriting;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @Author: liyian
@@ -14,4 +17,6 @@ public interface CopyWritingDao {
     String selectCopyWritingTextByArea(String area);
 
     CopyWriting selectByArea(String area);
+
+    List<CopyWriting> selectListByArea(@Param("area") String area);
 }
