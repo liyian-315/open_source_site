@@ -10,6 +10,7 @@ import com.sdu.open.source.site.enums.TaskStatus;
 import com.sdu.open.source.site.service.CopyWritingService;
 import com.sdu.open.source.site.service.DsProtocolService;
 import com.sdu.open.source.site.service.TaskService;
+import com.sdu.open.source.site.service.TaskUserService;
 import com.sdu.open.source.site.service.UserService;
 import com.sdu.open.source.site.vo.TaskListVO;
 import com.sdu.open.source.site.vo.TaskVO;
@@ -27,8 +28,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.sdu.open.source.site.service.TaskUserService;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api/task")
@@ -39,6 +45,7 @@ public class TaskController {
     private UserService userService;
     private DsProtocolService dsProtocolService;
     private CopyWritingService  copyWritingService;
+    private TaskUserService taskUserService;
     // todo 后期改为配置在application.properties
     private static final String UPLOAD_BASE_DIR = "task-uploads/";
 
@@ -61,63 +68,95 @@ public class TaskController {
     public void setCopyWritingService(CopyWritingService copyWritingService) {
         this.copyWritingService = copyWritingService;
     }
-    //返回当前用户已领取但未完成的任务数量
+
+    @Autowired
+    public void setTaskUserService(TaskUserService taskUserService) {
+        this.taskUserService = taskUserService;
+    }
+
     @GetMapping("/fetchReceivedTaskCount")
-    public ResponseEntity<?> fetchReceivedTaskCount(@RequestParam("params") String collectionUser) {
+    public ResponseEntity<?> fetchReceivedTaskCount(@RequestParam("params") String username) {
         try {
-            int count = taskService.getUserTaskCount(collectionUser, TaskStatus.COMPLETED.getCode());
+            User user = userService.findByUsername(username);
+            if (user == null) return new ResponseEntity<>(0, HttpStatus.OK);
+            int count = taskUserService.countActiveByUserId(user.getId()); // 关系表状态=2
             return new ResponseEntity<>(count, HttpStatus.OK);
         } catch (Exception e) {
-            log.error("用户任务统计失败", e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
+
 
     @GetMapping("/fetchMyTasks")
-    public ResponseEntity<TaskListVO> fetchMyTasks(
-            @RequestParam("params") String collectionUser,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
+    public ResponseEntity<?> fetchMyTasks(@RequestParam("params") String username,
+                                          @RequestParam("pageNum") String pageNumParam,
+                                          @RequestParam("pageSize") String pageSizeParam) {
         try {
-            Long total = taskService.countTasksByCollectionUser(collectionUser);
-            List<Task> tasks = taskService.getTasksByCollectionUser(collectionUser, pageNum, pageSize);
-            Set<Long> dsProtocolIds = tasks.stream()
-                    .map(Task::getTaskProtocolId)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-            final Map<Long, DsProtocol> dsProtocolMap;
-            if (!dsProtocolIds.isEmpty()) {
-                List<DsProtocol> dsProtocols = dsProtocolService.findByIds(dsProtocolIds);
-                dsProtocolMap = dsProtocols.stream()
-                        .collect(Collectors.toMap(DsProtocol::getId, p -> p));
-            } else {
-                dsProtocolMap = new HashMap<>();
+            int pageNum = Integer.parseInt(pageNumParam);
+            int pageSize = Integer.parseInt(pageSizeParam);
+
+            User user = userService.findByUsername(username);
+            if (user == null) {
+                return new ResponseEntity<>(ApiResponse.error(404, "用户不存在"), HttpStatus.OK);
             }
 
-            List<TaskVO> taskVOList = tasks.stream()
-                    .map(task -> {
-                        TaskVO vo = new TaskVO();
-                        BeanUtils.copyProperties(task, vo);
-                        vo.setTaskClassName(taskService.getClassNameById(task.getTaskClass()).getName());
-                        Long protocolId = task.getTaskProtocolId();
-                        if (protocolId != null && dsProtocolMap.containsKey(protocolId)) {
-                            DsProtocol dsProtocol = dsProtocolMap.get(protocolId);
-                            vo.setTaskProtocolTitle(dsProtocol.getTitle());
-                            vo.setTaskProtocolLink(dsProtocol.getLink());
-                        }
+            Long total = taskUserService.countTasksByUserId(user.getId());
+            List<Map<String, Object>> rows = taskUserService.findTasksByUserId(user.getId(), pageNum, pageSize);
 
-                        return vo;
-                    })
-                    .collect(Collectors.toList());
+            List<TaskVO> vos = rows.stream().map(r -> {
+                TaskVO vo = new TaskVO();
+                vo.setId(((Number) r.get("id")).longValue());
+                vo.setTaskName((String) r.get("task_name"));
 
-            // 构建分页结果
-            return getTaskListVOResponseEntity(pageNum, pageSize, total, taskVOList);
+                // 分类名：优先用 task_class_name（没有时回退到ID字符串）
+                Object className = r.get("task_class_name");
+                if (className != null) {
+                    vo.setTaskClassName(className.toString());
+                } else {
+                    Object cls = r.get("task_class");
+                    if (cls != null) vo.setTaskClassName(cls.toString());
+                }
+
+                vo.setTaskDescription((String) r.get("task_description"));
+
+                Object st = r.get("rel_task_status");
+                if (st != null) vo.setTaskStatus(((Number) st).intValue()); // 状态来自关系表
+
+                vo.setCollectionUser(username);
+
+                Object ct = r.get("rel_collection_time");
+                vo.setCollectionTime(ct == null ? null : ct.toString());
+
+                Object ctime = r.get("create_time");
+                vo.setCreateTime(ctime == null ? null : ctime.toString());
+
+                Object utime = r.get("update_time");
+                vo.setUpdateTime(utime == null ? null : utime.toString());
+
+                Object dltime = r.get("deadline_time");
+                vo.setDeadlineTime(dltime == null ? null : dltime.toString());
+
+                // 协议名/链接
+                Object ptitle = r.get("task_protocol_title");
+                if (ptitle != null) vo.setTaskProtocolTitle(ptitle.toString());
+                Object plink = r.get("task_protocol_link");
+                if (plink != null) vo.setTaskProtocolLink(plink.toString());
+
+                return vo;
+            }).collect(Collectors.toList());
+
+            TaskListVO result = new TaskListVO();
+            result.setTotal(total);
+            result.setTaskList(vos);
+            result.setPageNum(pageNum);
+            result.setPageSize(pageSize);
+
+            return new ResponseEntity<>(ApiResponse.success("查询成功", result), HttpStatus.OK);
         } catch (Exception e) {
-            log.error("我的任务查询失败", e);
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ApiResponse.error(500, "查询失败"), HttpStatus.OK);
         }
     }
+
 
     private ResponseEntity<TaskListVO> getTaskListVOResponseEntity(@RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize, Long total, List<TaskVO> taskVOList) {
         TaskListVO result = new TaskListVO();
@@ -134,10 +173,13 @@ public class TaskController {
     public ResponseEntity<TaskListVO> fetchTasksByCategory(
             @RequestParam("categoryId") Long categoryId,
             @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "username", required = false) String username) {
         try {
             Long total = taskService.countTasksByCategoryId(categoryId);
             List<Task> tasks = taskService.getTasksByCategoryId(categoryId, pageNum, pageSize);
+
+            // 协议映射：保持你原来的逻辑
             Set<Long> dsProtocolIds = tasks.stream()
                     .map(Task::getTaskProtocolId)
                     .filter(Objects::nonNull)
@@ -146,25 +188,38 @@ public class TaskController {
             final Map<Long, DsProtocol> DsProtocolMap;
             if (!dsProtocolIds.isEmpty()) {
                 List<DsProtocol> DsProtocols = dsProtocolService.findByIds(dsProtocolIds);
-                DsProtocolMap = DsProtocols.stream()
-                        .collect(Collectors.toMap(DsProtocol::getId, p -> p));
+                DsProtocolMap = DsProtocols.stream().collect(Collectors.toMap(DsProtocol::getId, p -> p));
             } else {
                 DsProtocolMap = new HashMap<>();
             }
-            List<TaskVO> taskVOList = tasks.stream()
-                    .map(task -> {
-                        TaskVO vo = new TaskVO();
-                        BeanUtils.copyProperties(task, vo);
-                        Long protocolId = task.getTaskProtocolId();
-                        if (protocolId != null && DsProtocolMap.containsKey(protocolId)) {
-                            DsProtocol dsProtocol = DsProtocolMap.get(protocolId);
-                            vo.setTaskProtocolTitle(dsProtocol.getTitle());
-                            vo.setTaskProtocolLink(dsProtocol.getLink());
-                        }
 
-                        return vo;
-                    })
-                    .collect(Collectors.toList());
+            List<TaskVO> taskVOList = tasks.stream().map(task -> {
+                TaskVO vo = new TaskVO();
+                BeanUtils.copyProperties(task, vo);
+                Long protocolId = task.getTaskProtocolId();
+                if (protocolId != null && DsProtocolMap.containsKey(protocolId)) {
+                    DsProtocol dsProtocol = DsProtocolMap.get(protocolId);
+                    vo.setTaskProtocolTitle(dsProtocol.getTitle());
+                    vo.setTaskProtocolLink(dsProtocol.getLink());
+                }
+                return vo;
+            }).collect(Collectors.toList());
+
+            // ★ 打标“已领取”：仅判断 task_user 是否存在 (user_id, task_id) 记录（存在即已领取）
+            if (username != null && !username.trim().isEmpty() && !taskVOList.isEmpty()) {
+                User user = userService.findByUsername(username);
+                if (user != null) {
+                    // 为了少动你现有结构，这里用已有的 relationExists 逐个判断（每页 10/20 性能可接受）
+                    for (TaskVO vo : taskVOList) {
+                        if (vo.getId() != null && taskUserService.relationExists(vo.getId(), user.getId())) {
+                            // 仅用于前端 isClaimed 的判定（!!collectionUser）
+                            vo.setCollectionUser(username);
+                            // 如果想在“领取页”也配合显示状态，可选写上：
+                            // if (vo.getTaskStatus() == null) vo.setTaskStatus(TaskStatus.RECEIVED.getCode());
+                        }
+                    }
+                }
+            }
 
             return getTaskListVOResponseEntity(pageNum, pageSize, total, taskVOList);
         } catch (Exception e) {
@@ -172,6 +227,7 @@ public class TaskController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @GetMapping("/fetchTaskCategories")
     public ResponseEntity<List<TaskClass>> fetchTaskCategories() {
@@ -187,17 +243,9 @@ public class TaskController {
         }
     }
 
-    /**
-     * 领取任务
-     *
-     * @param param
-     * @return
-     * @throws Exception
-     */
     @PutMapping("/claimTask")
     public ResponseEntity<?> claimTask(@RequestBody RequestParamDTO param) throws Exception {
         try {
-            // 获取请求参数
             String username = param.getUsername();
             Long taskId = param.getTaskId();
             if (username == null || username.trim().isEmpty()) {
@@ -208,47 +256,37 @@ public class TaskController {
             }
             User user = userService.findByUsername(username);
             if (user == null) {
-                log.warn("任务领取失败，用户不存在: {}", username);
                 return ResponseEntity.ok(ApiResponse.error(404, "用户不存在"));
             }
             if (!user.getHasSignedPdf()) {
-                return ResponseEntity.ok(ApiResponse.error(400, "用户未签署协议"));
+                return ResponseEntity.ok(ApiResponse.error(400, "需要先成为实习生"));
             }
-
-            // 验证任务是否存在
             Task task = taskService.findById(taskId);
             if (task == null) {
-                log.warn("任务领取失败，任务不存在: {}", taskId);
                 return ResponseEntity.ok(ApiResponse.error(404, "任务不存在"));
             }
 
-            // 验证任务状态是否可领取
-            if (!TaskStatus.TO_BE_RECEIVED.getCode().equals(task.getTaskStatus())) {
-                log.warn("任务 {} 不可领取，当前状态: {}", taskId, task.getTaskStatus());
-                return ResponseEntity.ok(ApiResponse.error(400, "任务不可领取，当前状态:"));
-            }
-
-            // 验证用户是否已领取该任务
-            if (username.equals(task.getCollectionUser())) {
+            // 基于关系表防重复领取
+            if (taskUserService.relationExists(taskId, user.getId())) {
                 return ResponseEntity.ok(ApiResponse.error(400, "您已领取该任务"));
             }
 
-            // 验证用户领取任务数量是否超限
-            int userTaskCount = taskService.getUserTaskCount(username, TaskStatus.COMPLETED.getCode());
+            // 限制：已领取未完成 < 2
+            int userTaskCount = taskUserService.countActiveByUserId(user.getId());
             if (userTaskCount >= 2) {
                 return ResponseEntity.ok(ApiResponse.error(400, "最多只能领取 2 个任务"));
             }
 
-            taskService.updateTask(param);
+            // 写入关系（状态=2 已领取）
+            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            taskUserService.addRelation(taskId, user.getId(), TaskStatus.RECEIVED.getCode(), now, now);
 
-            log.info("用户 {} 成功领取任务 {}", username, taskId);
             return ResponseEntity.ok(ApiResponse.success(null, "任务领取成功"));
-
         } catch (Exception e) {
-            log.error("任务领取异常", e);
             return ResponseEntity.ok(ApiResponse.error(500, "任务领取失败，请稍后重试"));
         }
     }
+
 
     @PostMapping("/uploadFile")
     public ResponseEntity<?> uploadTaskFiles(

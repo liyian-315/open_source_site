@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdu.open.source.site.repository.TaskUserDao">
+
+    <resultMap id="BaseResultMap" type="com.sdu.open.source.site.entity.TaskUser">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="user_id" property="userId"/>
+        <result column="task_status" property="taskStatus"/>
+        <result column="collection_time" property="collectionTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, task_id, user_id, task_status, collection_time, create_time
+    </sql>
+
+    <select id="exists" resultType="int">
+        SELECT COUNT(1) FROM task_user WHERE task_id = #{taskId} AND user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="com.sdu.open.source.site.entity.TaskUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO task_user (task_id, user_id, task_status, collection_time, create_time)
+        VALUES (#{taskId}, #{userId}, #{taskStatus}, #{collectionTime}, #{createTime})
+    </insert>
+
+    <!-- 用户“已领取未完成”任务数：状态=2 -->
+    <select id="countActiveByUserId" resultType="int">
+        SELECT COUNT(1)
+        FROM task_user
+        WHERE user_id = #{userId}
+          AND task_status = 2
+    </select>
+
+    <!-- 我的任务：task_user + task -->
+    <!-- Mapper/TaskUserMapper.xml -->
+    <select id="findTasksByUserId" resultType="map">
+        SELECT
+            t.id,
+            t.task_name,
+            t.task_class,
+            tc.name                    AS task_class_name,      -- 分类名
+            t.task_description,
+            t.task_protocol_id,
+            dp.title                   AS task_protocol_title,  -- 协议名
+            dp.link                    AS task_protocol_link,   -- 协议链接
+            t.create_time,
+            t.update_time,
+            t.deadline_time,
+            tu.task_status             AS rel_task_status,
+            tu.collection_time         AS rel_collection_time
+        FROM task_user tu
+                 JOIN task t           ON t.id = tu.task_id
+                 LEFT JOIN task_class tc ON tc.id = t.task_class
+                 LEFT JOIN ds_protocol dp ON dp.id = t.task_protocol_id
+        WHERE tu.user_id = #{userId}
+        ORDER BY tu.collection_time DESC
+            LIMIT #{offset}, #{pageSize}
+    </select>
+
+
+    <select id="countTasksByUserId" resultType="long">
+        SELECT COUNT(1) FROM task_user WHERE user_id = #{userId}
+    </select>
+
+    <select id="findClaimedTaskIdsByUserIdAndTaskIds" resultType="long">
+        SELECT DISTINCT task_id
+        FROM task_user
+        WHERE user_id = #{userId}
+        AND task_id IN
+        <foreach collection="taskIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

@@ -2,6 +2,8 @@ package com.sdu.open.source.site.entity;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class Task {
     private Long id; // 主键自增 id
@@ -15,4 +17,6 @@ public class Task {
     private String collectionTime; // 任务领取时间
     private String createTime; // 任务创建时间
     private String updateTime; // 任务更新时间
+    private String deadlineTime; // 任务截止时间
+
 }
