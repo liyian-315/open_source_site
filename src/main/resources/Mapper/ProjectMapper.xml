@@ -8,7 +8,13 @@
     </select>
 
     <select id="selectById" parameterType="java.lang.Long" resultType="com.sdu.open.source.site.entity.Project">
-        select id, name, description, create_time as createTime
+        select id,
+               name,
+               description,
+               create_time,
+               git_repo,
+               project_intro,
+               module_display
         from projects
         where id = #{id}
     </select>

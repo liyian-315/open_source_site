@@ -1,5 +1,6 @@
 package com.sdu.open.source.site.controller;
 
+import com.sdu.open.source.site.dto.ProjectDetailDTO;
 import com.sdu.open.source.site.entity.Project;
 import com.sdu.open.source.site.entity.Tag;
 import com.sdu.open.source.site.service.ProjectService;
@@ -37,14 +38,15 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Project> getProjectById(@PathVariable("id") Long id) {
+    public ResponseEntity<ProjectDetailDTO> getProjectById(@PathVariable("id") Long id) {
         try {
-            Project project = projectService.getProjectById(id);
-            if (project == null) {
+            ProjectDetailDTO projectDetail = projectService.getProjectDetail(id);
+            if (projectDetail == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(project, HttpStatus.OK);
+            return new ResponseEntity<>(projectDetail, HttpStatus.OK);
         } catch (Exception e) {
+            log.error("Error getting project by id: {}", id, e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
