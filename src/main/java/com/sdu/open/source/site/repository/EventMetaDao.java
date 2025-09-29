@@ -1,6 +1,6 @@
 package com.sdu.open.source.site.repository;
 
-import com.sdu.open.source.site.dto.TypeVO;
+import com.sdu.open.source.site.vo.TypeVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

@@ -14,7 +14,8 @@
         where area = #{area}
     </select>
 
-    <select id="selectListByArea" parameterType="java.lang.String" resultType="com.sdu.open.source.site.entity.CopyWriting">
+    <select id="selectListByArea" parameterType="java.lang.String"
+            resultType="com.sdu.open.source.site.entity.CopyWriting">
         select id,
                area,
                title,
@@ -25,4 +26,18 @@
         where area = #{area}
         order by id asc
     </select>
+
+    <insert id="insert" parameterType="com.sdu.open.source.site.entity.CopyWriting">
+        INSERT INTO copy_writing (area,
+                                  title,
+                                  copy_writing_text,
+                                  link,
+                                  note)
+        VALUES (#{area},
+                #{title},
+                #{copyWritingText},
+                #{link},
+                #{note})
+    </insert>
+
 </mapper>

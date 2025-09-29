@@ -20,8 +20,8 @@
     </select>
 
     <insert id="insert" parameterType="com.sdu.open.source.site.entity.Project">
-        insert into projects (name, description, create_time)
-        values (#{name}, #{description}, #{createTime})
+        insert into projects (name, description, create_time, git_repo, project_intro, module_display)
+        values (#{name}, #{description}, #{createTime}, #{gitRepo}, #{projectIntro}, #{moduleDisplay})
     </insert>
 
     <update id="update" parameterType="com.sdu.open.source.site.entity.Project">
@@ -37,4 +37,15 @@
         delete from projects
         where id = #{id}
     </delete>
+    <select id="selectByPage" resultType="com.sdu.open.source.site.entity.Project">
+        select id, name, description, create_time as createTime,
+               git_repo as gitRepo, project_intro as projectIntro, module_display as moduleDisplay
+        from projects
+                 limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="selectTotalCount" resultType="java.lang.Long">
+        select count(*) from projects
+    </select>
+
 </mapper>
