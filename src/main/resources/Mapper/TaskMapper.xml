@@ -7,10 +7,14 @@
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="task_name" property="taskName" jdbcType="VARCHAR"/>
         <result column="task_class" property="taskClass" jdbcType="BIGINT"/>
+        <!-- 新增：协议ID映射 -->
+        <result column="task_protocol_id" property="taskProtocolId" jdbcType="BIGINT"/>
         <result column="task_description" property="taskDescription" jdbcType="LONGVARCHAR"/>
         <result column="task_status" property="taskStatus" jdbcType="INTEGER"/>
         <result column="collection_user" property="collectionUser" jdbcType="VARCHAR"/>
         <result column="collection_time" property="collectionTime" jdbcType="TIMESTAMP"/>
+        <!-- 新增：截止时间映射 -->
+        <result column="deadline_time" property="deadlineTime" jdbcType="TIMESTAMP"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
     </resultMap>
@@ -18,64 +22,61 @@
     <!-- 根据领取人姓名查询任务 -->
     <select id="findByCollectionUser" parameterType="map" resultMap="BaseResultMap">
         SELECT *
-        FROM
-            task
-        WHERE
-            collection_user = #{collectionUser}
-        LIMIT #{offset}, #{pageSize}
+        FROM task
+        WHERE collection_user = #{collectionUser}
+            LIMIT #{offset}, #{pageSize}
     </select>
 
     <select id="findByTaskClass" parameterType="map" resultMap="BaseResultMap">
         SELECT *
-        FROM
-            task
-        WHERE
-            task_class = #{taskClass}
-        LIMIT #{offset}, #{pageSize}
+        FROM task
+        WHERE task_class = #{taskClass}
+            LIMIT #{offset}, #{pageSize}
     </select>
 
     <select id="userTaskCount" resultType="java.lang.Integer">
         SELECT COUNT(*)
         FROM task
-        WHERE
-            collection_user = #{collectionUser}
+        WHERE collection_user = #{collectionUser}
           AND task_status = #{taskStatus}
     </select>
 
     <select id="findById" parameterType="java.lang.Long" resultMap="BaseResultMap">
         SELECT *
-        FROM
-            task
-        WHERE
-            id = #{id}
+        FROM task
+        WHERE id = #{id}
     </select>
 
     <update id="update" parameterType="com.sdu.open.source.site.entity.Task">
-        update task
+        UPDATE task
         <set>
             <include refid="sqlFragment"/>
         </set>
-        where id = #{id}
+        WHERE id = #{id}
     </update>
 
     <sql id="sqlFragment">
         <if test="taskStatus != null">task_status = #{taskStatus},</if>
+        <!-- 新增：协议ID可更新 -->
+        <if test="taskProtocolId != null">task_protocol_id = #{taskProtocolId},</if>
         <if test="collectionUser != null">collection_user = #{collectionUser},</if>
         <if test="collectionTime != null">collection_time = #{collectionTime},</if>
+        <!-- 新增：截止时间可更新 -->
+        <if test="deadlineTime != null">deadline_time = #{deadlineTime},</if>
         <if test="updateTime != null">update_time = #{updateTime}</if>
     </sql>
 
     <select id="countTasksByCategoryId" resultType="java.lang.Long">
-        select count(*)
-        from task
+        SELECT COUNT(*)
+        FROM task
         <where>
             task_class = #{categoryId}
         </where>
     </select>
 
     <select id="countTasksByCollectionUser" resultType="java.lang.Long">
-        select count(*)
-        from task
+        SELECT COUNT(*)
+        FROM task
         <where>
             collection_user = #{user}
         </where>

@@ -15,4 +15,5 @@ public class TaskVO {
     private String collectionTime; // 任务领取时间
     private String createTime; // 任务创建时间
     private String updateTime; // 任务更新时间
+    private String deadlineTime; // 任务截止时间
 }
