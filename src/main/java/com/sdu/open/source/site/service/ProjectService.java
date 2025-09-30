@@ -159,13 +159,24 @@ public class ProjectService {
         }
     }
 
-    public boolean addProjectDisplay(Long projectId, List<CopyWriting> cwList) {
-        String area = CopyWritingAreas.PROJECT_DISPLAY.getCode() + projectId.toString();
-        for (CopyWriting cw : cwList) {
-            cw.setArea(area);
-            copyWritingDao.insert(cw);
+    public boolean addProjectDisplay(RequestParamDTO param) {
+        if (CopyWritingAreas.PROJECT_DISPLAY.getCode().equals(param.getCwType())){
+            List<CopyWriting> cwList = param.getCwList();
+            for (CopyWriting cw : cwList) {
+                cw.setArea(CopyWritingAreas.PROJECT_DISPLAY.getCode()+param.getProjectId().toString());
+                copyWritingDao.insert(cw);
+            }
+            return true;
         }
-        return true;
+        if (CopyWritingAreas.LEARNING_MATERIAL.getCode().equals(param.getCwType())){
+            List<CopyWriting> cwList = param.getCwList();
+            for (CopyWriting cw : cwList) {
+                cw.setArea(CopyWritingAreas.PROJECT_DISPLAY.getCode()+param.getProjectId().toString());
+                copyWritingDao.insert(cw);
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

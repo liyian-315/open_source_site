@@ -150,7 +150,10 @@ public class ProjectController {
             if (projectId == null || projectId <= 0) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            if (projectService.addProjectDisplay(projectId, cwList)) {
+            if (requestParamDTO.getCwType() == null || requestParamDTO.getCwType().trim().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            if (projectService.addProjectDisplay(requestParamDTO)) {
                 return new ResponseEntity<>(HttpStatus.CREATED);
             }
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
