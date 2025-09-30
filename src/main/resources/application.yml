@@ -9,7 +9,7 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.104.20.165:3306/openSourceSite?serverTimezone=UTC
+    url: jdbc:mysql://rm-bp148z5e593e5u63nvo.mysql.rds.aliyuncs.com:3306/openSourceSite?serverTimezone=UTC
     username: root
-    password: G%6aNc*3Sd7&Yh4
+    password: Admin!@#
 
