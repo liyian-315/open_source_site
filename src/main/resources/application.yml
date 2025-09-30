@@ -8,6 +8,6 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://rm-bp15i4z510c996b2llo.mysql.rds.aliyuncs.com:3306/openSourceSite?serverTimezone=UTC
-    username: ericsalvatore
-    password: DHJ#20152011#dhj
+    url: jdbc:mysql://rm-bp148z5e593e5u63nvo.mysql.rds.aliyuncs.com:3306/openSourceSite?serverTimezone=UTC
+    username: root
+    password: Admin!@#
