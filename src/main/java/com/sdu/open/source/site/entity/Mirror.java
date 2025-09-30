@@ -6,7 +6,8 @@ import lombok.Data;
 public class Mirror {
     private Long id;
     private String name;
-    private String url;
+    private String urlOut;
+    private String urlInter;
     private String size;
     private String time;
     private String arch;
