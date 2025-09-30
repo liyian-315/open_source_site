@@ -21,4 +21,6 @@ public interface CopyWritingDao {
     List<CopyWriting> selectListByArea(@Param("area") String area);
 
     void insert(CopyWriting cw);
+
+    void deleteByArea(String cwArea);
 }

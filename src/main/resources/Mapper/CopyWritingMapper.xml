@@ -40,4 +40,8 @@
                 #{note})
     </insert>
 
+    <delete id="deleteByArea" parameterType="java.lang.String">
+        delete from copy_writing
+        where area = #{area}
+    </delete>
 </mapper>
