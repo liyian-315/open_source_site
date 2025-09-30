@@ -1,5 +1,7 @@
 package com.sdu.open.source.site.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sdu.open.source.site.dto.ProjectDetailDTO;
 import com.sdu.open.source.site.entity.CopyWriting;
@@ -15,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -46,10 +50,6 @@ public class ProjectService {
         this.projectTagDao = projectTagDao;
         this.copyWritingDao = copyWritingDao;
         this.objectMapper = objectMapper;
-    }
-
-    public List<Project> getAllProjects() {
-        return projectDao.selectAll();
     }
 
     public ProjectDetailDTO getProjectDetail(Long id) {
@@ -98,8 +98,17 @@ public class ProjectService {
         return moduleDisplayMap;
     }
 
-    public Project createProject(Project project) {
+    public Project createProject(Project project) throws JsonProcessingException {
         project.setCreateTime(LocalDateTime.now().format(formatter));
+        if(project.getModuleDisplay() == null){
+
+            // 将JSON字符串解析为JsonNode
+            JsonNode defaultModuleDisplay = objectMapper.readTree(
+                    "{\"gitRepo\": true, \"projectIntro\": true, \"projectDisplay\": false, \"learningMaterial\": false}"
+            );
+            // 设置默认值
+            project.setModuleDisplay(defaultModuleDisplay);
+        }
         projectDao.insert(project);
         return project;
     }
@@ -112,18 +121,49 @@ public class ProjectService {
         return tagDao.selectAll();
     }
 
-    public boolean addProjectTag(Long projectId, Long tagId) {
+    public boolean addProjectTag(Long projectId, List<Long> tagIds) {
         ProjectTag projectTag = new ProjectTag();
         projectTag.setProjectId(projectId);
-        projectTag.setTagId(tagId);
-
-        // 检查关联是否已存在
-        ProjectTag existing = projectTagDao.selectByProjectAndTagId(projectId, tagId);
-        if (existing != null) {
-            return false;
+        for (Long tagId : tagIds) {
+            projectTag.setTagId(tagId);
+            // 检查关联是否已存在
+            ProjectTag existing = projectTagDao.selectByProjectAndTagId(projectId, tagId);
+            if (existing != null) {
+                continue;
+            }
+            projectTagDao.insert(projectTag);
         }
+        return true;
+    }
 
-        projectTagDao.insert(projectTag);
+    public List<Project> getProjectsByPage(int offset, int pageSize) {
+        return projectDao.selectByPage(offset, pageSize);
+    }
+    public Long getTotalProjects() {
+        return projectDao.selectTotalCount();
+    }
+
+    @Transactional
+    public boolean addNewTag(Tag tag) {
+        try {
+            //检查标签是否已存在
+             Tag existingTag = tagDao.selectByName(tag.getName());
+             if (existingTag != null) {
+                 return false;
+             }
+            tagDao.insert(tag);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("添加标签失败", e);
+        }
+    }
+
+    public boolean addProjectDisplay(Long projectId, List<CopyWriting> cwList) {
+        String area = CopyWritingAreas.PROJECT_DISPLAY.getCode() + projectId.toString();
+        for (CopyWriting cw : cwList) {
+            cw.setArea(area);
+            copyWritingDao.insert(cw);
+        }
         return true;
     }
 }

@@ -19,4 +19,6 @@ public interface CopyWritingDao {
     CopyWriting selectByArea(String area);
 
     List<CopyWriting> selectListByArea(@Param("area") String area);
+
+    void insert(CopyWriting cw);
 }

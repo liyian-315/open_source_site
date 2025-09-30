@@ -1,10 +1,12 @@
 package com.sdu.open.source.site.dto;
 
+import com.sdu.open.source.site.entity.CopyWriting;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * 请求参数体
@@ -43,4 +45,7 @@ public class RequestParamDTO {
     private String bankCardNumber;
 
     private Long taskId;
+    private Long projectId;  // 项目ID
+    private List<Long> tagIds;         // 标签Id
+    private List<CopyWriting> cwList; // 文案列表
 }
