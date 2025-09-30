@@ -45,7 +45,16 @@ public class RequestParamDTO {
     private String bankCardNumber;
 
     private Long taskId;
+    /**
+     * project相关
+     */
     private Long projectId;  // 项目ID
+    private String name;
+    private String description;
+    private String gitRepo;
+    private String projectIntro;
     private List<Long> tagIds;         // 标签Id
     private List<CopyWriting> cwList; // 文案列表
+    // 文案类型（区分PROJECT_DISPLAY/LEARNING_MATERIAL，参考CopyWritingAreas枚举）
+    private String cwType;
 }

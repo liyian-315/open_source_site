@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sdu.open.source.site.dto.ProjectDetailDTO;
+import com.sdu.open.source.site.dto.RequestParamDTO;
 import com.sdu.open.source.site.entity.CopyWriting;
 import com.sdu.open.source.site.entity.Project;
 import com.sdu.open.source.site.entity.Tag;
@@ -164,6 +165,82 @@ public class ProjectService {
             cw.setArea(area);
             copyWritingDao.insert(cw);
         }
+        return true;
+    }
+
+    /**
+     * 更新项目基础信息（非null字段才更新）
+     */
+    public Project updateProjectBaseInfo(RequestParamDTO  param) {
+        Project existingProject = projectDao.selectById(param.getProjectId());
+        if (existingProject == null) {
+            log.warn("更新项目基础信息失败：项目不存在，projectId: {}", param.getProjectId());
+            return null;
+        }
+        if (param.getName() != null && !param.getName().trim().isEmpty()) {
+            existingProject.setName(param.getName().trim());
+        }
+        if (param.getDescription() != null) {
+            existingProject.setDescription(param.getDescription());
+        }
+        if (param.getGitRepo() != null) {
+            existingProject.setGitRepo(param.getGitRepo());
+        }
+        if (param.getProjectIntro() != null) {
+            existingProject.setProjectIntro(param.getProjectIntro());
+        }
+        projectDao.update(existingProject);
+        return projectDao.selectById(param.getProjectId());
+    }
+
+    /**
+     * 2. 全量更新项目标签（先删除原有关联，再新增）
+     */
+    @Transactional
+    public boolean updateProjectTags(Long projectId, List<Long> newTagIds) {
+        Project existingProject = projectDao.selectById(projectId);
+        if (existingProject == null) {
+            log.warn("更新项目标签失败：项目不存在，projectId: {}", projectId);
+            return false;
+        }
+        projectTagDao.deleteByProjectId(projectId);
+        log.info("已删除项目原有标签关联，projectId: {}", projectId);
+        addProjectTag(projectId, newTagIds);
+        log.info("已新增项目标签关联，projectId: {}, 新标签数量: {}", projectId, newTagIds.size());
+
+        return true;
+    }
+
+    /**
+     * 3. 全量更新项目文案（先删除原有文案，再批量新增）
+     */
+    @Transactional
+    public boolean updateProjectCopyWriting(RequestParamDTO param) {
+        Long projectId = param.getProjectId();
+        List<CopyWriting> newCwList = param.getCwList();
+        String cwType = param.getCwType();
+        Project existingProject = projectDao.selectById(projectId);
+        if (existingProject == null) {
+            log.warn("更新项目文案失败：项目不存在，projectId: {}", projectId);
+            return false;
+        }
+        String cwArea;
+        if (CopyWritingAreas.PROJECT_DISPLAY.getCode().equals(cwType)) {
+            cwArea = CopyWritingAreas.PROJECT_DISPLAY.getCode() + projectId;
+        } else if (CopyWritingAreas.LEARNING_MATERIAL.getCode().equals(cwType)) {
+            cwArea = CopyWritingAreas.LEARNING_MATERIAL.getCode() + projectId;
+        } else {
+            log.error("更新项目文案失败：无效的文案类型，cwType: {}", cwType);
+            throw new IllegalArgumentException("无效的文案类型");
+        }
+        copyWritingDao.deleteByArea(cwArea);
+        log.info("已删除项目原有文案，projectId: {}, 文案区域: {}", projectId, cwArea);
+        for (CopyWriting cw : newCwList) {
+            cw.setArea(cwArea); // 确保文案区域正确
+            copyWritingDao.insert(cw);
+        }
+        log.info("已新增项目文案，projectId: {}, 新文案数量: {}", projectId, newCwList.size());
+
         return true;
     }
 }

@@ -158,4 +158,65 @@ public class ProjectController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * 更新项目基础信息（名称、描述、Git仓库等）
+     */
+    @PutMapping("/api/admin/project/updateProject")
+    public ResponseEntity<Project> updateProject(@RequestBody RequestParamDTO updateParam) {
+        try {
+            if (updateParam.getProjectId() == null || updateParam.getProjectId() <= 0) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            Project updatedProject = projectService.updateProjectBaseInfo(updateParam);
+            if (updatedProject == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(updatedProject, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("更新项目基础信息失败，projectId: {}", updateParam.getProjectId(), e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 根据projectId全量更新标签（先删原有关联，再新增）
+     */
+    @PutMapping("/api/admin/project/updateProjectTags")
+    public ResponseEntity<Void> updateProjectTags(@RequestBody RequestParamDTO updateParam) {
+        try {
+            if (updateParam.getProjectId() == null || updateParam.getProjectId() <= 0 || updateParam.getTagIds() == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            boolean success = projectService.updateProjectTags(updateParam.getProjectId(), updateParam.getTagIds());
+            if (!success) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("更新项目标签失败，projectId: {}", updateParam.getProjectId(), e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    /**
+     * PUT /api/admin/project/updateProjectCW
+     */
+    @PutMapping("/api/admin/project/updateProjectCW")
+    public ResponseEntity<Void> updateProjectCW(@RequestBody RequestParamDTO updateParam) {
+        try {
+            if (updateParam.getProjectId() == null || updateParam.getProjectId() <= 0
+                    || updateParam.getCwList() == null || updateParam.getCwList().isEmpty()
+                    || updateParam.getCwType() == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            boolean success = projectService.updateProjectCopyWriting(updateParam);
+            if (!success) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("更新项目文案失败，projectId: {}", updateParam.getProjectId(), e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

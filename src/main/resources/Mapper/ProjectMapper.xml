@@ -27,8 +27,11 @@
     <update id="update" parameterType="com.sdu.open.source.site.entity.Project">
         update projects
         <set>
-            <if test="name != null">name = #{name},</if>
+            <if test="name != null and name.trim() != ''">name = #{name},</if>
             <if test="description != null">description = #{description},</if>
+            <if test="gitRepo != null">git_repo = #{gitRepo},</if>
+            <if test="projectIntro != null">project_intro = #{projectIntro},</if>
+            <if test="moduleDisplay != null">module_display = #{moduleDisplay},</if>
         </set>
         where id = #{id}
     </update>
