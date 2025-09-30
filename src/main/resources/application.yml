@@ -1,13 +1,16 @@
 mybatis:
   mapper-locations: classpath:Mapper/*.xml
   type-aliases-package: com.sdu.open.source.site.entity
-  config-location: classpath:mybatis-config.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
 server:
   port: 8080
 
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://rm-bp148z5e593e5u63nvo.mysql.rds.aliyuncs.com:3306/openSourceSite?serverTimezone=UTC
+    url: jdbc:mysql://47.104.20.165:3306/openSourceSite?serverTimezone=UTC
     username: root
-    password: Admin!@#
+    password: G%6aNc*3Sd7&Yh4
+
