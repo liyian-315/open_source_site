@@ -1,4 +1,4 @@
-package com.sdu.open.source.site.dto;
+package com.sdu.open.source.site.vo;
 import lombok.Data;
 
 @Data

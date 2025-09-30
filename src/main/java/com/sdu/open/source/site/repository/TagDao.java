@@ -11,4 +11,5 @@ public interface TagDao {
     Tag selectById(Long id);
     List<Tag> selectByProjectId(Long projectId);
     void insert(Tag tag);
+    Tag selectByName(String name);
 }

@@ -2,7 +2,7 @@
 package com.sdu.open.source.site.service;
 
 import com.sdu.open.source.site.dto.EventMetaDTO;
-import com.sdu.open.source.site.dto.TypeVO;
+import com.sdu.open.source.site.vo.TypeVO;
 import com.sdu.open.source.site.repository.EventMetaDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

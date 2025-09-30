@@ -11,6 +11,7 @@
         select project_id as projectId, tag_id as tagId
         from project_tag
         where project_id = #{projectId} and tag_id = #{tagId}
+        limit 1
     </select>
 
     <delete id="deleteByProjectId" parameterType="java.lang.Long">

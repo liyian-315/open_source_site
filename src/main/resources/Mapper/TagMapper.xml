@@ -24,4 +24,11 @@
         insert into tags (name)
         values (#{name})
     </insert>
+
+    <select id="selectByName" parameterType="java.lang.String" resultType="com.sdu.open.source.site.entity.Tag">
+        select id, name
+        from tags
+        where name = #{name}
+            limit 1
+    </select>
 </mapper>
