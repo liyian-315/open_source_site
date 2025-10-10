@@ -13,3 +13,31 @@ spring:
     username: root
     password: Admin!@#
 
+  mail:
+    username: cislc210sdu@163.com
+    password: TTid83v3vnt7sWSi
+    host: smtp.163.com
+    # 端口号465或587
+    port: 465
+    protocol: smtps
+    default-encoding: UTF-8
+    # 配置SSL 加密工厂
+    properties:
+      mail:
+        smtp:
+          socketFactoryClass: javax.net.ssl.SSLSocketFactory
+          #表示开启 DEBUG 模式
+          debug: true
+          ssl: true
+  redis:
+    host: redis-web
+    port: 16379
+    password: DsRedis@dongshan
+    timeout: 5000
+    database: 0
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms

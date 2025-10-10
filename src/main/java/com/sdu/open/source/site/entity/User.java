@@ -19,6 +19,7 @@ public class User {
     private String company;
     private String address;
     private String bankCardNumber;
+    private String giteeName;
     private String createTime;
     private String updateTime;
     private Boolean hasSignedPdf;

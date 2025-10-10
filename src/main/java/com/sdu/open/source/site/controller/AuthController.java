@@ -8,11 +8,10 @@ import com.sdu.open.source.site.dto.RequestParamDTO;
 import com.sdu.open.source.site.entity.CopyWriting;
 import com.sdu.open.source.site.entity.User;
 import com.sdu.open.source.site.security.JwtTokenUtil;
-import com.sdu.open.source.site.service.CopyWritingService;
-import com.sdu.open.source.site.service.UserDetailsServiceImpl;
-import com.sdu.open.source.site.service.UserService;
+import com.sdu.open.source.site.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,7 +19,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import javax.mail.MessagingException;
 
 /**
  * 认证控制器
@@ -42,11 +44,14 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-    private CopyWritingService copyWritingService;
+    private final CopyWritingService copyWritingService;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final AsyncMailService asyncMailService;
 
-    @Autowired
-    public void setCopyWritingService(CopyWritingService copyWritingService) {
+    public AuthController(CopyWritingService copyWritingService, RedisTemplate<String, String> redisTemplate, AsyncMailService asyncMailService) {
         this.copyWritingService = copyWritingService;
+        this.redisTemplate = redisTemplate;
+        this.asyncMailService = asyncMailService;
     }
 
     /**
@@ -85,7 +90,20 @@ public class AuthController {
             if (userService.findByUsername(request.getUsername()) != null) {
                 return ResponseEntity.badRequest().body(ApiResponse.error(400, "用户名已存在"));
             }
-
+            // 校验验证码
+            String email = request.getEmail();
+            String inputCode = request.getVerificationCode();
+            if (StringUtils.isEmpty(inputCode)) {
+                return ResponseEntity.badRequest().body(ApiResponse.error(400, "请输入邮箱验证码"));
+            }
+            String storedCode = redisTemplate.opsForValue().get(email);
+            if (storedCode == null) {
+                return ResponseEntity.badRequest().body(ApiResponse.error(400, "验证码已过期，请重新获取"));
+            }
+            if (!storedCode.equals(inputCode)) {
+                return ResponseEntity.badRequest().body(ApiResponse.error(400, "验证码不正确"));
+            }
+            redisTemplate.delete(email);
             // 创建新用户
             User user = new User();
             user.setUsername(request.getUsername());
@@ -171,5 +189,30 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.ok(ApiResponse.error(500, "获取协议失败，请稍后重试"));
         }
+    }
+
+    @GetMapping(value = "/public/sendEmail/{email}")
+    public ResponseEntity<?> sendEmail(@PathVariable("email") String email) {
+        try {
+            if (!isValidEmail(email)) {
+                log.warn("邮箱格式不正确，邮箱：{}", email);
+                return ResponseEntity.ok(ApiResponse.error(400, "邮箱格式不正确"));
+            }
+            asyncMailService.asyncSendVerificationCode(email);
+            log.info("验证码发送任务已提交，邮箱：{}", email);
+            return ResponseEntity.ok(ApiResponse.success("验证码已开始发送，请查收邮件（若5分钟内未收到，可重新获取）"));
+
+        } catch (Exception e) {
+            log.error("验证码发送任务提交失败，邮箱：{}，异常信息：{}", email, e.getMessage(), e);
+            return ResponseEntity.ok(ApiResponse.error(500, "系统繁忙，请稍后重试"));
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        if (!StringUtils.hasText(email)) {
+            return false;
+        }
+        String regex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return email.matches(regex);
     }
 }

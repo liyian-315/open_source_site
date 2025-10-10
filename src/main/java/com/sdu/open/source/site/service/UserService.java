@@ -100,6 +100,9 @@ public class UserService {
         if (param.getBankCardNumber() != null) {
             user.setBankCardNumber(param.getBankCardNumber());
         }
+        if (param.getGiteeName() != null) {
+            user.setGiteeName(param.getGiteeName());
+        }
         user.setUpdateTime(LocalDateTime.now().format(formatter));
         userDao.update(user);
     }
