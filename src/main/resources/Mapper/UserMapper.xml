@@ -26,6 +26,7 @@
         <if test="company != null">company = #{company},</if>
         <if test="address != null">address = #{address},</if>
         <if test="bankCardNumber != null">bank_card_number = #{bankCardNumber},</if>
+        <if test="giteeName != null">gitee_name = #{giteeName},</if>
         <if test="updateTime != null">update_time = #{updateTime}</if>
 </sql>
 

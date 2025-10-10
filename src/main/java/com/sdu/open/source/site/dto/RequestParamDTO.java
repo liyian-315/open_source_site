@@ -44,6 +44,7 @@ public class RequestParamDTO {
             message = "银行卡号必须是13-19位数字")
     private String bankCardNumber;
 
+    private String giteeName;
     private Long taskId;
     /**
      * project相关

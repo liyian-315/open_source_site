@@ -15,4 +15,5 @@ public class RegisterRequest {
     private String phone;
     private String company;
     private String address;
+    private String verificationCode;
 }
