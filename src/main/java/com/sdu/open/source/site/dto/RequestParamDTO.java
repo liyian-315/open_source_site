@@ -16,10 +16,10 @@ public class RequestParamDTO {
     /**
      * 个人信息
      */
-    // 用户名：必填，用于定位用户
-    @NotBlank(message = "用户名不能为空")
     private String username;
-
+    private String fullname;
+    private String role;
+    private Boolean hasSignedPdf;
     // 备用邮箱：可选，但格式必须正确
     @Pattern(regexp = "^$|^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$",
             message = "备用邮箱格式不正确")
@@ -58,4 +58,10 @@ public class RequestParamDTO {
     private List<CopyWriting> cwList; // 文案列表
     // 文案类型（区分PROJECT_DISPLAY/LEARNING_MATERIAL，参考CopyWritingAreas枚举）
     private String cwType;
+
+    /*
+     * 分页参数
+     */
+    private Integer pageNum;
+    private Integer pageSize;
 }
