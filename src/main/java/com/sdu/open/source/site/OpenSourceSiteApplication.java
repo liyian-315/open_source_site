@@ -9,7 +9,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class OpenSourceSiteApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OpenSourceSiteApplication.class, args);
+        SpringApplication app = new SpringApplication(OpenSourceSiteApplication.class);
+        String env = System.getenv("APP_ENV");
+        if (env == null || env.trim().isEmpty()) {
+            env = "dev";
+        }
+        app.setAdditionalProfiles(env);
+        app.run(args);
     }
-
 }
