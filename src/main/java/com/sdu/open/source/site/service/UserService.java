@@ -3,12 +3,14 @@ package com.sdu.open.source.site.service;
 import com.sdu.open.source.site.dto.RequestParamDTO;
 import com.sdu.open.source.site.entity.User;
 import com.sdu.open.source.site.repository.UserDao;
+import com.sdu.open.source.site.vo.PageResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * 用户服务类
@@ -32,6 +34,21 @@ public class UserService {
      */
     public User findByUsername(String username) {
         return userDao.findByUsername(username);
+    }
+
+    public PageResultVO<User> selectByUsernameOrFullname(RequestParamDTO param) {
+        User user = new User();
+        user.setUsername(param.getUsername());
+        user.setFullname(param.getFullname());
+        Integer pageNum = param.getPageNum();
+        Integer pageSize = param.getPageSize();
+        Integer startIndex = (pageNum - 1) * pageSize;
+        List<User> userList = userDao.selectByUsernameOrFullname(user, startIndex, pageSize);
+        Long total = userDao.selectCountByUsernameOrFullname(user);
+        PageResultVO<User> pageResult = new PageResultVO<>();
+        pageResult.setList(userList);
+        pageResult.setTotal(total);
+        return pageResult;
     }
 
     /**
@@ -85,6 +102,15 @@ public class UserService {
     public void updateUserByParam(RequestParamDTO param) {
         User user = new User();
         user.setUsername(param.getUsername());
+        if (param.getRole() != null) {
+            user.setRole(param.getRole());
+        }
+        if (param.getHasSignedPdf() != null) {
+            user.setHasSignedPdf(param.getHasSignedPdf());
+        }
+        if (param.getFullname() != null) {
+            user.setFullname(param.getFullname());
+        }
         if (param.getEmail2() != null) {
             user.setEmail2(param.getEmail2());
         }
@@ -105,5 +131,14 @@ public class UserService {
         }
         user.setUpdateTime(LocalDateTime.now().format(formatter));
         userDao.update(user);
+    }
+
+    public boolean deleteUserById(Long id) {
+        User user = userDao.findById(id);
+        if (user == null) {
+            return false;
+        }
+        userDao.deleteById(id);
+        return true;
     }
 }

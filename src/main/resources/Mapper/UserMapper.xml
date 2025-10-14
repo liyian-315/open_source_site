@@ -22,11 +22,14 @@
 
     <sql id="sqlFragment">
         <if test="email2 != null">email2 = #{email2},</if>
+        <if test="role != null">role = #{role},</if>
         <if test="phone != null">phone = #{phone},</if>
         <if test="company != null">company = #{company},</if>
         <if test="address != null">address = #{address},</if>
         <if test="bankCardNumber != null">bank_card_number = #{bankCardNumber},</if>
         <if test="giteeName != null">gitee_name = #{giteeName},</if>
+        <if test="hasSignedPdf != null">has_signed_pdf = #{hasSignedPdf},</if>
+        <if test="fullname != null">fullname = #{fullname},</if>
         <if test="updateTime != null">update_time = #{updateTime}</if>
 </sql>
 
@@ -37,4 +40,39 @@
         </set>
         where username = #{username}
     </update>
+
+    <select id="selectByUsernameOrFullname" resultType="com.sdu.open.source.site.entity.User">
+        SELECT *
+        FROM user
+        <where>
+            <if test="user.username != null and user.username.trim() != ''">
+                AND username LIKE CONCAT('%', TRIM(#{user.username}), '%')
+            </if>
+            <if test="user.fullname != null and user.fullname.trim() != ''">
+                AND fullname LIKE CONCAT('%', TRIM(#{user.fullname}), '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+        LIMIT #{startIndex}, #{pageSize}
+    </select>
+
+    <select id="selectCountByUsernameOrFullname" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM user
+        <where>
+            <!-- 关键修改：通过user对象访问属性 -->
+            <if test="user.username != null and user.username.trim() != ''">
+                AND username LIKE CONCAT('%', TRIM(#{user.username}), '%')
+            </if>
+            <if test="user.fullname != null and user.fullname.trim() != ''">
+                AND fullname LIKE CONCAT('%', TRIM(#{user.fullname}), '%')
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        delete
+        from user
+        where id = #{id}
+    </delete>
 </mapper>

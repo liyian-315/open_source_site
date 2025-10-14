@@ -2,6 +2,9 @@ package com.sdu.open.source.site.repository;
 
 import com.sdu.open.source.site.entity.User;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 用户数据访问接口
@@ -31,4 +34,10 @@ public interface UserDao {
     User findById(Long id);
 
     void update(User user);
+
+    List<User> selectByUsernameOrFullname(@Param("user") User user, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
+
+    Long selectCountByUsernameOrFullname(@Param("user") User user);
+
+    void deleteById(Long id);
 }

@@ -1,0 +1,13 @@
+spring:
+  redis:
+    host: redis-web
+    port: 16379
+    password: DsRedis@dongshan
+    timeout: 5000
+    database: 0
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
