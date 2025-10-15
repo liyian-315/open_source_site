@@ -157,6 +157,7 @@ public class TaskController {
 
             return new ResponseEntity<>(ApiResponse.success("查询成功", result), HttpStatus.OK);
         } catch (Exception e) {
+            log.error("fetchMyTasks failed", e);
             return new ResponseEntity<>(ApiResponse.error(500, "查询失败"), HttpStatus.OK);
         }
     }
