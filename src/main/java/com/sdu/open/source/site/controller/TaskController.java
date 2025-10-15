@@ -142,6 +142,10 @@ public class TaskController {
                 Object plink = r.get("task_protocol_link");
                 if (plink != null) vo.setTaskProtocolLink(plink.toString());
 
+                Object glink = r.get("gitee_link");
+                if (glink != null) vo.setGiteeLink(glink.toString());
+
+
                 return vo;
             }).collect(Collectors.toList());
 
@@ -201,20 +205,18 @@ public class TaskController {
                     DsProtocol dsProtocol = DsProtocolMap.get(protocolId);
                     vo.setTaskProtocolTitle(dsProtocol.getTitle());
                     vo.setTaskProtocolLink(dsProtocol.getLink());
+                    vo.setGiteeLink(task.getGiteeLink());
                 }
                 return vo;
             }).collect(Collectors.toList());
 
-            // ★ 打标“已领取”：仅判断 task_user 是否存在 (user_id, task_id) 记录（存在即已领取）
+            // 打标“已领取”：仅判断 task_user 是否存在 (user_id, task_id) 记录（存在即已领取）
             if (username != null && !username.trim().isEmpty() && !taskVOList.isEmpty()) {
                 User user = userService.findByUsername(username);
                 if (user != null) {
-                    // 为了少动你现有结构，这里用已有的 relationExists 逐个判断（每页 10/20 性能可接受）
                     for (TaskVO vo : taskVOList) {
                         if (vo.getId() != null && taskUserService.relationExists(vo.getId(), user.getId())) {
-                            // 仅用于前端 isClaimed 的判定（!!collectionUser）
                             vo.setCollectionUser(username);
-                            // 如果想在“领取页”也配合显示状态，可选写上：
                             // if (vo.getTaskStatus() == null) vo.setTaskStatus(TaskStatus.RECEIVED.getCode());
                         }
                     }

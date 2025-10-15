@@ -18,5 +18,6 @@ public class Task {
     private String createTime; // 任务创建时间
     private String updateTime; // 任务更新时间
     private String deadlineTime; // 任务截止时间
+    private String giteeLink; // Gitee链接
 
 }
