@@ -7,12 +7,6 @@ server:
   port: 8080
 
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://rm-bp148z5e593e5u63nvo.mysql.rds.aliyuncs.com:3306/openSourceSite?serverTimezone=UTC
-    username: root
-    password: Admin!@#
-
   mail:
     username: cislc210sdu@163.com
     password: TTid83v3vnt7sWSi

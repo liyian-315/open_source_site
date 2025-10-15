@@ -11,3 +11,8 @@ spring:
         max-idle: 8
         min-idle: 0
         max-wait: -1ms
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://rm-bp148z5e593e5u63nvo.mysql.rds.aliyuncs.com:3306/openSourceTest?serverTimezone=UTC
+    username: root
+    password: Admin!@#
