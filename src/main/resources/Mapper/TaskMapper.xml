@@ -24,15 +24,15 @@
     <select id="findByCollectionUser" parameterType="map" resultMap="BaseResultMap">
         SELECT *
         FROM task
-        WHERE collection_user = #{collectionUser}
-            LIMIT #{offset}, #{pageSize}
+        WHERE collection_user = #{collectionUser} LIMIT #{offset}
+            , #{pageSize}
     </select>
 
     <select id="findByTaskClass" parameterType="map" resultMap="BaseResultMap">
         SELECT *
         FROM task
-        WHERE task_class = #{taskClass}
-            LIMIT #{offset}, #{pageSize}
+        WHERE task_class = #{taskClass} LIMIT #{offset}
+            , #{pageSize}
     </select>
 
     <select id="userTaskCount" resultType="java.lang.Integer">
@@ -82,6 +82,83 @@
         FROM task
         <where>
             collection_user = #{user}
+        </where>
+    </select>
+
+    <select id="selectTasksByParam" resultType="com.sdu.open.source.site.entity.Task">
+        SELECT * FROM task
+        <where>
+            <if test="param.taskId != null">AND id = #{param.taskId}</if>
+            <if test="param.taskName != null and param.taskName != ''">
+                AND task_name LIKE CONCAT('%', #{param.taskName}, '%')
+            </if>
+            <if test="param.collectionUser != null and param.collectionUser != ''">
+                AND collection_user LIKE CONCAT('%', #{param.collectionUser}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+    <select id="selectTaskVOByJoin" resultType="com.sdu.open.source.site.vo.AdminTaskVO">
+        SELECT
+        tu.id AS taskUserId,
+        t.task_name AS taskName,
+        tc.name AS taskClassName,
+        u.fullname AS collectionUser,
+        u.phone AS phone,
+        u.email AS email,
+        u.email2 AS email2,
+        tu.collection_time AS collectionTime,
+        t.create_time AS createTime,
+        t.deadline_time AS deadlineTime,
+        tu.task_status AS taskStatus,
+        tu.result_link AS resultLink
+        FROM
+        task t
+        INNER JOIN task_user tu
+        ON t.id = tu.task_id
+        INNER JOIN user u
+        ON tu.user_id = u.id
+        LEFT JOIN task_class tc
+        ON t.task_class = tc.id
+        <where>
+            <if test="param.taskName != null and param.taskName != ''">
+                AND t.task_name LIKE CONCAT('%', #{param.taskName}, '%')
+            </if>
+            <if test="param.collectionUser != null and param.collectionUser != ''">
+                AND u.fullname LIKE CONCAT('%', #{param.collectionUser}, '%')
+            </if>
+            <if test="param.taskStatus != null">
+                AND tu.task_status = #{param.taskStatus}
+            </if>
+        </where>
+        ORDER BY
+        t.create_time DESC,
+        tu.collection_time DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+    <select id="countTaskVOByJoin" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM
+        task t
+        INNER JOIN task_user tu
+        ON t.id = tu.task_id
+        INNER JOIN user u
+        ON tu.user_id = u.id
+        LEFT JOIN task_class tc
+        ON t.task_class = tc.id
+        <where>
+            <if test="param.taskName != null and param.taskName != ''">
+                AND t.task_name LIKE CONCAT('%', #{param.taskName}, '%')
+            </if>
+            <if test="param.collectionUser != null and param.collectionUser != ''">
+                AND u.fullname LIKE CONCAT('%', #{param.collectionUser}, '%')
+            </if>
+            <if test="param.taskStatus != null">
+                AND tu.task_status = #{param.taskStatus}
+            </if>
         </where>
     </select>
 </mapper>

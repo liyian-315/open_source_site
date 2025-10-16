@@ -11,4 +11,7 @@ public class TaskUser {
     private Integer taskStatus;     // 2-已领取，3-已完成
     private String collectionTime;  // 领取时间
     private String createTime;      // 记录创建时间
+    private Integer recogStatus; // 成果认定状态 ：1 未开始 2 进行中 3 完成
+    private String resultLink; // 任务结果链接
+    private String updateTime;
 }
