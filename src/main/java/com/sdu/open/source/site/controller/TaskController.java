@@ -145,7 +145,15 @@ public class TaskController {
                 Object glink = r.get("gitee_link");
                 if (glink != null) vo.setGiteeLink(glink.toString());
 
+                Object recog = r.get("recog_status");
+                if (recog != null) {
+                    vo.setRecognitionStatus(Integer.parseInt(recog.toString()));
+                }
 
+                Object rlink = r.get("result_link");
+                if (rlink != null) {
+                    vo.setResultLink(rlink.toString());
+                }
                 return vo;
             }).collect(Collectors.toList());
 
@@ -157,6 +165,7 @@ public class TaskController {
 
             return new ResponseEntity<>(ApiResponse.success("查询成功", result), HttpStatus.OK);
         } catch (Exception e) {
+            log.error("fetchMyTasks failed", e);
             return new ResponseEntity<>(ApiResponse.error(500, "查询失败"), HttpStatus.OK);
         }
     }
