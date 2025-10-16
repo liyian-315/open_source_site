@@ -7,11 +7,7 @@ import com.sdu.open.source.site.entity.Task;
 import com.sdu.open.source.site.entity.TaskClass;
 import com.sdu.open.source.site.entity.User;
 import com.sdu.open.source.site.enums.TaskStatus;
-import com.sdu.open.source.site.service.CopyWritingService;
-import com.sdu.open.source.site.service.DsProtocolService;
-import com.sdu.open.source.site.service.TaskService;
-import com.sdu.open.source.site.service.TaskUserService;
-import com.sdu.open.source.site.service.UserService;
+import com.sdu.open.source.site.service.*;
 import com.sdu.open.source.site.vo.TaskListVO;
 import com.sdu.open.source.site.vo.TaskVO;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +44,9 @@ public class TaskController {
     private TaskUserService taskUserService;
     // todo 后期改为配置在application.properties
     private static final String UPLOAD_BASE_DIR = "task-uploads/";
+    @Autowired
+    private MinioService minioService;
+
 
     @Autowired
     public void setTaskService(TaskService taskService) {
@@ -298,70 +297,103 @@ public class TaskController {
         }
     }
 
-
     @PostMapping("/uploadFile")
     public ResponseEntity<?> uploadTaskFiles(
             @RequestParam("taskId") Long taskId,
             @RequestParam("files") MultipartFile[] files,
+            @RequestParam(value = "username", required = false) String usernameParam,
             HttpServletRequest request) {
 
         Map<String, Object> response = new HashMap<>();
-
         try {
-            String usernameHeader = request.getHeader("username");
-            String username = null;
-
-            if (usernameHeader != null && usernameHeader.startsWith("Bearer ")) {
-                username = usernameHeader.substring(7).trim();
-            } else if (usernameHeader != null) {
-                username = usernameHeader.trim();
+            // 1) 拿 username：param > header
+            String username = usernameParam;
+            if (username == null || username.isBlank()) {
+                String header = request.getHeader("username");
+                if (header != null && header.startsWith("Bearer ")) username = header.substring(7).trim();
+                else if (header != null) username = header.trim();
             }
-
-            if (username == null || username.isEmpty()) {
+            if (username == null || username.isBlank()) {
                 response.put("success", false);
                 response.put("message", "用户名不能为空");
                 return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
-
+            if (taskId == null) {
+                response.put("success", false);
+                response.put("message", "taskId 不能为空");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
             if (files == null || files.length == 0) {
                 response.put("success", false);
                 response.put("message", "请选择要上传的文件");
                 return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
 
-            String folderName = username + "-" + taskId;
-
-            String uploadBasePath = System.getProperty("user.dir") + File.separator + "task-uploads" + File.separator;
-            Path uploadDir = Paths.get(uploadBasePath + folderName);
-
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-                log.info("创建上传目录: {}", uploadDir.toAbsolutePath());
+            // 2) 校验用户存在
+            User user = userService.findByUsername(username);
+            if (user == null) {
+                response.put("success", false);
+                response.put("message", "用户不存在");
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
+
+            // 3) 组织对象路径：task-uploads/{username}-{taskId}/{ts}_{filename}
+            String prefix = "task-uploads/" + username + "-" + taskId + "/";
+            long now = System.currentTimeMillis();
+
+            List<Map<String, Object>> items = new ArrayList<>();
+            List<String> urls = new ArrayList<>();
 
             for (MultipartFile file : files) {
-                if (!file.isEmpty()) {
-                    String originalFilename = file.getOriginalFilename();
-                    originalFilename = originalFilename.replace(File.separator, "").replace("/", "");
-                    Path filePath = uploadDir.resolve(originalFilename);
-                    file.transferTo(filePath);
-                    log.info("文件上传成功: {}", filePath.toAbsolutePath());
-                }
+                if (file.isEmpty()) continue;
+
+                String original = Optional.ofNullable(file.getOriginalFilename()).orElse("unnamed");
+                String safeName = original.replace("\\", "_").replace("/", "_");
+                String objectName = prefix + now + "_" + safeName;
+
+                // 4) 上传到 MinIO
+                minioService.putObject(objectName, file);
+
+                // 5) 生成可访问 URL（public-url 已配置，返回直链）
+                String url = minioService.getFileUrl(objectName);
+
+                Map<String, Object> it = new HashMap<>();
+                it.put("filename", original);
+                it.put("objectName", objectName);
+                it.put("url", url);
+                it.put("size", file.getSize());
+                items.add(it);
+                urls.add(url);
             }
 
+            if (items.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "没有有效文件");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+
+            // 6) 写回 task_user.result_link：取第一条 URL 入库（如需拼多条，可自行改为 join）
+            String storeUrl = urls.get(0);
+
+            int updated = taskUserService.updateResultLinkByTaskAndUser(taskId, user.getId(), storeUrl);
+            if (updated <= 0) {
+                log.warn("updateResultLinkByTaskAndUser affected 0 rows: taskId={}, userId={}", taskId, user.getId());
+            }
+
+            // 7) 返回上传结果
             response.put("success", true);
             response.put("message", "文件上传成功");
+            response.put("bucket", minioService.getBucket());
+            response.put("prefix", prefix);
+            response.put("items", items);
+            response.put("storedLink", storeUrl);
+
             return new ResponseEntity<>(response, HttpStatus.OK);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("文件上传失败", e);
             response.put("success", false);
             response.put("message", "文件上传失败: " + e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error("处理文件上传时发生错误", e);
-            response.put("success", false);
-            response.put("message", "处理错误: " + e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

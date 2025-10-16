@@ -76,4 +76,11 @@
             #{id}
         </foreach>
     </select>
+
+    <update id="updateResultLinkByTaskAndUser">
+        UPDATE task_user
+        SET result_link = #{resultLink}, update_time = NOW()
+        WHERE task_id = #{taskId} AND user_id = #{userId}
+    </update>
+
 </mapper>
