@@ -83,4 +83,39 @@
         WHERE task_id = #{taskId} AND user_id = #{userId}
     </update>
 
+
+    <select id="selectByTaskIds" parameterType="java.util.List" resultType="com.sdu.open.source.site.entity.TaskUser">
+        SELECT * FROM task_user WHERE task_id IN
+        <foreach collection="taskIds" item="taskId" open="(" separator="," close=")">
+            #{taskId}
+        </foreach>
+    </select>
+
+    <select id="selectByTaskUserId" parameterType="java.lang.Long" resultType="com.sdu.open.source.site.entity.TaskUser">
+        SELECT *
+        FROM task_user
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateById" parameterType="com.sdu.open.source.site.entity.TaskUser">
+        UPDATE task_user
+        <set>
+            <if test="taskStatus != null">task_status = #{taskStatus},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="countTUsByParam" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM task_user
+        <where>
+            <if test="param.taskId != null">AND id = #{param.taskId}</if>
+            <if test="param.taskName != null and param.taskName != ''">
+                AND task_name LIKE CONCAT('%', #{param.taskName}, '%')
+            </if>
+            <if test="param.collectionUser != null and param.collectionUser != ''">
+                AND collection_user LIKE CONCAT('%', #{param.collectionUser}, '%')
+            </if>
+        </where>
+    </select>
 </mapper>

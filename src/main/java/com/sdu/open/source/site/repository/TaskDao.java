@@ -1,7 +1,9 @@
 package com.sdu.open.source.site.repository;
 
+import com.sdu.open.source.site.dto.RequestParamDTO;
 import com.sdu.open.source.site.entity.Task;
 import com.sdu.open.source.site.entity.TaskClass;
+import com.sdu.open.source.site.vo.AdminTaskVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -41,4 +43,20 @@ public interface TaskDao {
     Long countTasksByCategoryId(Long categoryId);
 
     Long countTasksByCollectionUser(String user);
+
+    long countTasksByParam(@Param("param") RequestParamDTO param);
+
+    List<Task> selectTasksByParam(
+            @Param("param") RequestParamDTO param,
+            @Param("start") int start,
+            @Param("pageSize") int pageSize
+    );
+
+    List<AdminTaskVO> selectTaskVOByJoin(
+            @Param("param") RequestParamDTO param,
+            @Param("start") int start,
+            @Param("pageSize") int pageSize
+    );
+
+    long countTaskVOByJoin(@Param("param") RequestParamDTO param  );
 }

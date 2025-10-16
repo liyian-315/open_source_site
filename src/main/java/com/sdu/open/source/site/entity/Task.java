@@ -12,7 +12,7 @@ public class Task {
     private Long taskProtocolId; // 任务协议id
     private String taskClassName; // 分类名
     private String taskDescription; // 任务详细描述
-    private Integer taskStatus; // 任务状态，1 - 待领取，2 - 已领取，3 - 已完成
+    private Integer taskStatus; // 任务状态，1 审核中 2 进行中 3 结束 4 关闭
     private String collectionUser; // 领取人 name
     private String collectionTime; // 任务领取时间
     private String createTime; // 任务创建时间

@@ -12,4 +12,12 @@
         from task_class
         where id=#{id}
     </select>
+
+    <select id="selectByIds" parameterType="java.util.List" resultType="com.sdu.open.source.site.entity.TaskClass">
+        SELECT * FROM task_class
+        WHERE id IN
+        <foreach collection="list" item="classId" open="(" separator="," close=")">
+            #{classId}
+        </foreach>
+    </select>
 </mapper>
