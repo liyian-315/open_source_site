@@ -23,4 +23,8 @@ public interface TaskUserDao {
             @Param("userId") Long userId,
             @Param("taskIds") List<Long> taskIds
     );
+
+    int updateResultLinkByTaskAndUser(@Param("taskId") Long taskId,
+                                      @Param("userId") Long userId,
+                                      @Param("resultLink") String resultLink);
 }

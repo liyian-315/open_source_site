@@ -42,4 +42,9 @@ public class TaskUserService {
     public Long countTasksByUserId(Long userId) {
         return taskUserDao.countTasksByUserId(userId);
     }
+
+    public int updateResultLinkByTaskAndUser(Long taskId, Long userId, String resultLink) {
+        return taskUserDao.updateResultLinkByTaskAndUser(taskId, userId, resultLink);
+    }
+
 }

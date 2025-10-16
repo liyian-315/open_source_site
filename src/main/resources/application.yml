@@ -5,8 +5,29 @@ mybatis:
 
 server:
   port: 8080
+  tomcat:
+    # 允许大请求体完全吞下；-1 表示不限制
+    max-swallow-size: -1
+    # 表单 POST 大小；-1 表示不限制（老版本名为 maxHttpHeaderSize 不是这个）
+    max-http-form-post-size: -1
+
+minio:
+  endpoint: http://222.194.65.108:9000
+  access-key: 8HKhAEWLSz6f1V26dO6h
+  secret-key: YKf9MtQ7FgRnylgjRPpdB5ZwN6jWsc7E2WDFdRlY
+  bucket: dongshan-shixirespdf
+  public-url: https://riscv-cn.org/sduproxy
 
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      # 单个文件大小上限
+      max-file-size: 50MB
+      # 整个请求（多个文件之和）上限
+      max-request-size: 200MB
+      # 懒解析（到真正访问文件流时再解析，有利于异常处理）
+      resolve-lazily: true
   mail:
     username: cislc210sdu@163.com
     password: TTid83v3vnt7sWSi
