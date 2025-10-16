@@ -7,16 +7,17 @@
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="task_name" property="taskName" jdbcType="VARCHAR"/>
         <result column="task_class" property="taskClass" jdbcType="BIGINT"/>
-        <!-- 新增：协议ID映射 -->
+        <!-- 协议ID映射 -->
         <result column="task_protocol_id" property="taskProtocolId" jdbcType="BIGINT"/>
         <result column="task_description" property="taskDescription" jdbcType="LONGVARCHAR"/>
         <result column="task_status" property="taskStatus" jdbcType="INTEGER"/>
         <result column="collection_user" property="collectionUser" jdbcType="VARCHAR"/>
         <result column="collection_time" property="collectionTime" jdbcType="TIMESTAMP"/>
-        <!-- 新增：截止时间映射 -->
+        <!-- 截止时间映射 -->
         <result column="deadline_time" property="deadlineTime" jdbcType="TIMESTAMP"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="gitee_link" property="giteeLink" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!-- 根据领取人姓名查询任务 -->
@@ -64,6 +65,8 @@
         <!-- 新增：截止时间可更新 -->
         <if test="deadlineTime != null">deadline_time = #{deadlineTime},</if>
         <if test="updateTime != null">update_time = #{updateTime}</if>
+        <if test="giteeLink != null">gitee_link = #{giteeLink},</if>
+
     </sql>
 
     <select id="countTasksByCategoryId" resultType="java.lang.Long">

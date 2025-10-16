@@ -50,6 +50,7 @@
             t.deadline_time,
             tu.task_status             AS rel_task_status,
             tu.collection_time         AS rel_collection_time
+            t.gitee_link               AS gitee_link,
         FROM task_user tu
                  JOIN task t           ON t.id = tu.task_id
                  LEFT JOIN task_class tc ON tc.id = t.task_class
