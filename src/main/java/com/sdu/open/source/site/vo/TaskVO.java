@@ -17,4 +17,6 @@ public class TaskVO {
     private String updateTime; // 任务更新时间
     private String deadlineTime; // 任务截止时间
     private String giteeLink; // gitee链接
+    private Integer recognitionStatus; // 成果认定状态（1未开始/2进行中/3完成）
+    private String resultLink;  // 提交的成果链接
 }
