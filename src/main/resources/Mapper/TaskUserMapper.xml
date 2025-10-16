@@ -77,6 +77,13 @@
         </foreach>
     </select>
 
+    <update id="updateResultLinkByTaskAndUser">
+        UPDATE task_user
+        SET result_link = #{resultLink}, update_time = NOW()
+        WHERE task_id = #{taskId} AND user_id = #{userId}
+    </update>
+
+
     <select id="selectByTaskIds" parameterType="java.util.List" resultType="com.sdu.open.source.site.entity.TaskUser">
         SELECT * FROM task_user WHERE task_id IN
         <foreach collection="taskIds" item="taskId" open="(" separator="," close=")">

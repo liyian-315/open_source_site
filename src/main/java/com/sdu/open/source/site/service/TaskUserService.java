@@ -50,6 +50,11 @@ public class TaskUserService {
         return taskUserDao.countTasksByUserId(userId);
     }
 
+    public int updateResultLinkByTaskAndUser(Long taskId, Long userId, String resultLink) {
+        return taskUserDao.updateResultLinkByTaskAndUser(taskId, userId, resultLink);
+    }
+
+
     public boolean update(@Valid RequestParamDTO param) {
         Assert.isTrue(param.getTaskStatus() >= 1 && param.getTaskStatus() <= 4,
                 "任务状态不合法：仅支持 1（审核中）、2（进行中）、3（结束）、4（关闭）");
