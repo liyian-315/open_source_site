@@ -1,4 +1,22 @@
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          gitee:
+            client-id: 822a5d91a6e9fb920cbf7ae96634c26ffc0cd7b144b53cd7a98943a40f87f3a2
+            client-secret: 19f99ae7de4336926ffadf47ed82c0edcee50ba44a6175683717750e543342fb
+            client-name: Gitee
+            provider: gitee
+            redirect-uri: "{baseUrl}/login/oauth2/code/gitee"
+            authorization-grant-type: authorization_code
+            scope: user_info
+        provider:
+          gitee:
+            authorization-uri: https://gitee.com/oauth/authorize
+            token-uri: https://gitee.com/oauth/token
+            user-info-uri: https://gitee.com/api/v5/user
+            user-name-attribute: login
   redis:
     host: localhost
     port: 6379
