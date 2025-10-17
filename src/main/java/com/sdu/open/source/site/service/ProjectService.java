@@ -1,6 +1,7 @@
 package com.sdu.open.source.site.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sdu.open.source.site.dto.ProjectDetailDTO;
@@ -71,32 +72,55 @@ public class ProjectService {
         String learningMaterialArea = CopyWritingAreas.LEARNING_MATERIAL.getCode() + id;
         List<CopyWriting> learningMaterials = copyWritingDao.selectListByArea(learningMaterialArea);
         dto.setLearningMaterials(learningMaterials);
-        // 动态设置 moduleDisplay
-        Map<String, Boolean> moduleDisplayMap = getStringBooleanMap(project, projectDisplays, learningMaterials);
+        Map<String, Boolean> dbModuleDisplayMap = parseDbModuleDisplay(project.getModuleDisplay());
+        Map<String, Boolean> defaultModuleDisplayMap = getDefaultModuleDisplayMap(project, projectDisplays, learningMaterials);
+        Map<String, Boolean> finalModuleDisplayMap = mergeModuleDisplay(dbModuleDisplayMap, defaultModuleDisplayMap);
 
         try {
-            dto.setModuleDisplay(objectMapper.valueToTree(moduleDisplayMap));
+            dto.setModuleDisplay(objectMapper.valueToTree(finalModuleDisplayMap));
         } catch (Exception e) {
             log.error("Failed to convert moduleDisplayMap to JsonNode", e);
-            // 若转换失败，设置默认值
-            Map<String, Boolean> defaultMap = new HashMap<>();
-            defaultMap.put("gitRepo", true);
-            defaultMap.put("projectIntro", true);
-            defaultMap.put("projectDisplay", false);
-            defaultMap.put("learningMaterial", false);
-            dto.setModuleDisplay(objectMapper.valueToTree(defaultMap));
+            // 转换失败时使用原始默认值
+            Map<String, Boolean> fallbackMap = new HashMap<>();
+            fallbackMap.put("gitRepo", true);
+            fallbackMap.put("projectIntro", true);
+            fallbackMap.put("projectDisplay", false);
+            fallbackMap.put("learningMaterial", false);
+            dto.setModuleDisplay(objectMapper.valueToTree(fallbackMap));
         }
 
         return dto;
     }
 
-    private static Map<String, Boolean> getStringBooleanMap(Project project, List<CopyWriting> projectDisplays, List<CopyWriting> learningMaterials) {
-        Map<String, Boolean> moduleDisplayMap = new HashMap<>();
-        moduleDisplayMap.put("gitRepo", project.getGitRepo() != null && !project.getGitRepo().trim().isEmpty());
-        moduleDisplayMap.put("projectIntro", project.getProjectIntro() != null && !project.getProjectIntro().trim().isEmpty());
-        moduleDisplayMap.put("projectDisplay", projectDisplays != null && !projectDisplays.isEmpty());
-        moduleDisplayMap.put("learningMaterial", learningMaterials != null && !learningMaterials.isEmpty());
-        return moduleDisplayMap;
+    private Map<String, Boolean> parseDbModuleDisplay(JsonNode dbModuleDisplayNode) {
+        Map<String, Boolean> dbMap = new HashMap<>();
+        if (dbModuleDisplayNode == null || dbModuleDisplayNode.isNull() || !dbModuleDisplayNode.isObject()) {
+            log.debug("Database moduleDisplay is null or not object, return empty map");
+            return dbMap;
+        }
+
+        try {
+            // 替换 treeToValue 为 convertValue，支持 TypeReference
+            dbMap = objectMapper.convertValue(dbModuleDisplayNode, new TypeReference<Map<String, Boolean>>() {});
+        } catch (Exception e) {
+            log.warn("Failed to parse db moduleDisplay JsonNode to Map", e);
+        }
+        return dbMap == null ? new HashMap<>() : dbMap;
+    }
+
+    private Map<String, Boolean> getDefaultModuleDisplayMap(Project project, List<CopyWriting> projectDisplays, List<CopyWriting> learningMaterials) {
+        Map<String, Boolean> defaultMap = new HashMap<>();
+        defaultMap.put("gitRepo", project.getGitRepo() != null && !project.getGitRepo().trim().isEmpty());
+        defaultMap.put("projectIntro", project.getProjectIntro() != null && !project.getProjectIntro().trim().isEmpty());
+        defaultMap.put("projectDisplay", projectDisplays != null && !projectDisplays.isEmpty());
+        defaultMap.put("learningMaterial", learningMaterials != null && !learningMaterials.isEmpty());
+        return defaultMap;
+    }
+
+    private Map<String, Boolean> mergeModuleDisplay(Map<String, Boolean> dbMap, Map<String, Boolean> defaultMap) {
+        Map<String, Boolean> mergedMap = new HashMap<>(defaultMap); // 先加载默认值
+        mergedMap.putAll(dbMap); // 用数据库配置覆盖已有项（数据库存在的key优先）
+        return mergedMap;
     }
 
     public Project createProject(Project project) throws JsonProcessingException {
