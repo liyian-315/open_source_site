@@ -53,6 +53,7 @@ public class RequestParamDTO {
     private String taskName;
     private String collectionUser;
     private Integer taskStatus;
+    private Integer recogStatus;
     /**
      * project相关
      */

@@ -15,5 +15,6 @@ public class AdminTaskVO {
     private String createTime; // 任务创建时间
     private String deadlineTime; // 任务截止时间
     private Integer taskStatus; // 任务状态：1 审核中 2 进行中 3 结束 4 关闭
+    private Integer recogStatus;
     private String resultLink; // 任务结果链接
 }
