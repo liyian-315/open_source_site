@@ -2,6 +2,7 @@ package com.sdu.open.source.site.security;
 
 import com.sdu.open.source.site.service.UserDetailsServiceImpl;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,6 +66,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 log.error("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
                 log.error("JWT Token has expired");
+            } catch (Exception e) {
+                log.error("JWT Token error: {}", e.getMessage());
             }
         } else {
             logger.warn("JWT Token does not begin with Bearer String");
