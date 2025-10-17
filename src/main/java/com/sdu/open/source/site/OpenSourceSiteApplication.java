@@ -12,7 +12,7 @@ public class OpenSourceSiteApplication {
         SpringApplication app = new SpringApplication(OpenSourceSiteApplication.class);
         String env = System.getenv("APP_ENV");
         if (env == null || env.trim().isEmpty()) {
-            env = "dev";
+            env = "prod";
         }
         app.setAdditionalProfiles(env);
         app.run(args);

@@ -21,8 +21,8 @@
     </select>
 
     <insert id="insert" parameterType="com.sdu.open.source.site.entity.TaskUser" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO task_user (task_id, user_id, task_status, collection_time, create_time)
-        VALUES (#{taskId}, #{userId}, #{taskStatus}, #{collectionTime}, #{createTime})
+        INSERT INTO task_user (task_id, user_id, task_status, collection_time, create_time, update_time)
+        VALUES (#{taskId}, #{userId}, #{taskStatus}, #{collectionTime}, #{createTime}, #{updateTime})
     </insert>
 
     <!-- 用户“已领取未完成”任务数：状态=2 -->

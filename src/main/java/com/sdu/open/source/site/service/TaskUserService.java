@@ -27,6 +27,7 @@ public class TaskUserService {
         tu.setTaskStatus(status);
         tu.setCollectionTime(collectionTime);
         tu.setCreateTime(createTime);
+        tu.setUpdateTime(createTime);
         taskUserDao.insert(tu);
     }
 
