@@ -19,6 +19,8 @@ minio:
   public-url: https://riscv-cn.org/sduproxy
 
 spring:
+#  profiles:
+#    active: dev
   servlet:
     multipart:
       enabled: true
