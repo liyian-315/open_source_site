@@ -113,7 +113,8 @@
         t.create_time AS createTime,
         t.deadline_time AS deadlineTime,
         tu.task_status AS taskStatus,
-        tu.result_link AS resultLink
+        tu.result_link AS resultLink,
+        tu.recog_status AS recogStatus
         FROM
         task t
         INNER JOIN task_user tu

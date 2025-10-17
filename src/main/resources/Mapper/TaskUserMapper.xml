@@ -101,6 +101,7 @@
         UPDATE task_user
         <set>
             <if test="taskStatus != null">task_status = #{taskStatus},</if>
+            <if test="recogStatus != null">recog_status = #{recogStatus},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </set>
         WHERE id = #{id}

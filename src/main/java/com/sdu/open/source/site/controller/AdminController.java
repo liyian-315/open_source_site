@@ -12,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-
 @RestController
 @RequestMapping("/api")
 @Slf4j
@@ -84,7 +82,7 @@ public class AdminController {
     @PutMapping("/admin/update_task_status")
     public ResponseEntity<?> updateTaskStatus(@RequestBody RequestParamDTO param) {
         try {
-            if (param == null || param.getTaskUserId() == null || param.getTaskStatus() == null) {
+            if (param == null || param.getTaskUserId() == null || (param.getTaskStatus() == null && param.getRecogStatus() == null)) {
                 return new ResponseEntity<>("参数不能为空提示", HttpStatus.BAD_REQUEST);
             }
             boolean success = taskUserService.update(param);

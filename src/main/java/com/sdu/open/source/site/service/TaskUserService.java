@@ -57,13 +57,19 @@ public class TaskUserService {
 
 
     public boolean update(@Valid RequestParamDTO param) {
-        Assert.isTrue(param.getTaskStatus() >= 1 && param.getTaskStatus() <= 4,
-                "任务状态不合法：仅支持 1（审核中）、2（进行中）、3（结束）、4（关闭）");
+        if (param.getTaskStatus() != null) {
+            Assert.isTrue(param.getTaskStatus() >= 1 && param.getTaskStatus() <= 4,
+                    "任务状态不合法：仅支持 1（审核中）、2（进行中）、3（结束）、4（关闭）");
+        } else if (param.getRecogStatus() != null) {
+            Assert.isTrue(param.getRecogStatus() >= 1 && param.getRecogStatus() <= 3,
+                    "识别状态不合法：仅支持 1（未开始）、2（进行中）、3（完成）");
+        }
         TaskUser Tu = taskUserDao.selectByTaskUserId(param.getTaskUserId());
         if (Tu == null) {
             return false;
         }
         Tu.setTaskStatus(param.getTaskStatus());
+        Tu.setRecogStatus(param.getRecogStatus());
         Tu.setUpdateTime(LocalDateTime.now().format(formatter));
         taskUserDao.updateById(Tu);
         return true;
