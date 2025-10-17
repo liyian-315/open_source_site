@@ -40,4 +40,6 @@ public interface UserDao {
     Long selectCountByUsernameOrFullname(@Param("user") User user);
 
     void deleteById(Long id);
+
+    List<User> selectByIds(@Param("userIds") List<Long> userIds);
 }

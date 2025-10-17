@@ -3,17 +3,23 @@ package com.sdu.open.source.site.service;
 import com.sdu.open.source.site.dto.RequestParamDTO;
 import com.sdu.open.source.site.entity.Task;
 import com.sdu.open.source.site.entity.TaskClass;
+import com.sdu.open.source.site.entity.TaskUser;
+import com.sdu.open.source.site.entity.User;
 import com.sdu.open.source.site.enums.TaskStatus;
 import com.sdu.open.source.site.repository.TaskClassDao;
 import com.sdu.open.source.site.repository.TaskDao;
+import com.sdu.open.source.site.repository.TaskUserDao;
+import com.sdu.open.source.site.repository.UserDao;
+import com.sdu.open.source.site.vo.AdminTaskVO;
+import com.sdu.open.source.site.vo.PageResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -22,6 +28,13 @@ public class TaskService {
     private TaskDao taskDao;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final UserDao userDao;
+    private final TaskUserDao taskUserDao;
+
+    public TaskService(UserDao userDao, TaskUserDao taskUserDao) {
+        this.userDao = userDao;
+        this.taskUserDao = taskUserDao;
+    }
 
     @Autowired
     public void setTaskClassDao(TaskClassDao taskClassDao) {
@@ -98,5 +111,21 @@ public class TaskService {
      */
     public Long countTasksByCollectionUser(String user) {
         return taskDao.countTasksByCollectionUser(user);
+    }
+
+    /**
+     * 条件查询任务
+     *
+     * @param param
+     * @return
+     */
+    public PageResultVO<AdminTaskVO> selectByParam(RequestParamDTO param) {
+        int pageNum = param.getPageNum() != null ? param.getPageNum() : 1;
+        int pageSize = param.getPageSize() != null ? param.getPageSize() : 10;
+        int start = (pageNum - 1) * pageSize;
+
+        List<AdminTaskVO> taskVOList = taskDao.selectTaskVOByJoin(param, start, pageSize);
+        long total = taskDao.countTaskVOByJoin(param);
+        return new PageResultVO<>(taskVOList, total);
     }
 }

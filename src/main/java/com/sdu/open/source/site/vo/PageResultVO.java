@@ -8,4 +8,12 @@ import java.util.List;
 public class PageResultVO<T> {
     private List<T> list;
     private Long total;
+
+    public PageResultVO(List<T> list, Long total) {
+        this.list = list;
+        this.total = total;
+    }
+
+    public PageResultVO() {
+    }
 }

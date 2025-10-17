@@ -75,4 +75,11 @@
         from user
         where id = #{id}
     </delete>
+
+    <select id="selectByIds" parameterType="java.util.List" resultType="com.sdu.open.source.site.entity.User">
+        SELECT * FROM user WHERE id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </select>
 </mapper>

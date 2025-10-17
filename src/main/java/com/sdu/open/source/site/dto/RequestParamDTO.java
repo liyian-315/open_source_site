@@ -45,7 +45,14 @@ public class RequestParamDTO {
     private String bankCardNumber;
 
     private String giteeName;
+    /**
+     * task相关
+     */
     private Long taskId;
+    private Long taskUserId;
+    private String taskName;
+    private String collectionUser;
+    private Integer taskStatus;
     /**
      * project相关
      */

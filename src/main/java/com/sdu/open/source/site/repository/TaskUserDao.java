@@ -1,5 +1,6 @@
 package com.sdu.open.source.site.repository;
 
+import com.sdu.open.source.site.dto.RequestParamDTO;
 import com.sdu.open.source.site.entity.TaskUser;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -27,4 +28,12 @@ public interface TaskUserDao {
     int updateResultLinkByTaskAndUser(@Param("taskId") Long taskId,
                                       @Param("userId") Long userId,
                                       @Param("resultLink") String resultLink);
+
+    List<TaskUser> selectByTaskIds(@Param("taskIds") List<Long> taskIds);
+
+    void updateById(TaskUser tu);
+
+    TaskUser selectByTaskUserId(Long id);
+
+    long countTUsByParam(@Param("param") RequestParamDTO param);
 }
