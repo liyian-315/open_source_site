@@ -23,7 +23,7 @@ public class AsyncMailService {
     @Async
     public void asyncSendVerificationCode(String email) {
         try {
-            boolean sendSuccess = mailMsgService.mail(email);
+            boolean sendSuccess = mailMsgService.sendVerificationCode(email);
             if (sendSuccess) {
                 log.info("异步发送验证码成功，邮箱：{}", email);
             } else {
@@ -39,7 +39,7 @@ public class AsyncMailService {
     }
 
     /**
-     * 可选：失败重试方法
+     * 验证码邮件重试发送
      * @param email 接收邮箱
      * @param retryCount 已重试次数
      */
@@ -51,12 +51,57 @@ public class AsyncMailService {
         log.info("邮箱 {} 第 {} 次重试发送验证码", email, retryCount);
         try {
             Thread.sleep(1000);
-            mailMsgService.mail(email);
+            mailMsgService.sendVerificationCode(email);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            log.error("重试线程中断，邮箱：{}", email);
+            log.error("验证码邮件重试线程中断，邮箱：{}", email);
         } catch (MessagingException e) {
             retrySend(email, retryCount + 1);
+        }
+    }
+
+    /**
+     * 异步发送密码重置邮件
+     * @param email 接收邮箱
+     * @param resetUrl 重置链接
+     */
+    @Async
+    public void asyncSendResetPasswordEmail(String email, String resetUrl) {
+        try {
+            boolean sendSuccess = mailMsgService.sendResetPasswordEmail(email, resetUrl); // 调用新方法
+            if (sendSuccess) {
+                log.info("异步发送密码重置邮件成功，邮箱：{}", email);
+            } else {
+                log.error("异步发送密码重置邮件失败，邮箱：{}", email);
+                retrySendResetEmail(email, resetUrl, 1);
+            }
+        } catch (MessagingException e) {
+            log.error("异步发送密码重置邮件异常，邮箱：{}，异常信息：{}", email, e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("异步发送密码重置邮件系统异常，邮箱：{}，异常信息：{}", email, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 密码重置邮件重试发送
+     * @param email 接收邮箱
+     * @param resetUrl 重置链接
+     * @param retryCount 已重试次数
+     */
+    private void retrySendResetEmail(String email, String resetUrl, int retryCount) throws MessagingException {
+        if (retryCount > 2) {
+            log.error("邮箱 {} 密码重置邮件重试次数已达上限，停止重试", email);
+            return;
+        }
+        log.info("邮箱 {} 第 {} 次重试发送密码重置邮件", email, retryCount);
+        try {
+            Thread.sleep(1000);
+            mailMsgService.sendResetPasswordEmail(email, resetUrl); // 调用新方法
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            log.error("密码重置邮件重试线程中断，邮箱：{}", email);
+        } catch (MessagingException e) {
+            retrySendResetEmail(email, resetUrl, retryCount + 1);
         }
     }
 }

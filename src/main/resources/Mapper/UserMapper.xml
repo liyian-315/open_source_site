@@ -40,6 +40,11 @@
         </set>
         where username = #{username}
     </update>
+    <update id="updatePassword" parameterType="com.sdu.open.source.site.entity.User">
+        update user
+        set password = #{password}
+        where id = #{id}
+    </update>
 
     <select id="selectByUsernameOrFullname" resultType="com.sdu.open.source.site.entity.User">
         SELECT *
@@ -60,7 +65,6 @@
         SELECT COUNT(*)
         FROM user
         <where>
-            <!-- 关键修改：通过user对象访问属性 -->
             <if test="user.username != null and user.username.trim() != ''">
                 AND username LIKE CONCAT('%', TRIM(#{user.username}), '%')
             </if>
@@ -81,5 +85,8 @@
         <foreach collection="userIds" item="userId" open="(" separator="," close=")">
             #{userId}
         </foreach>
+    </select>
+    <select id="selectByEmail" resultType="com.sdu.open.source.site.entity.User">
+        SELECT * FROM user WHERE email = #{email}
     </select>
 </mapper>

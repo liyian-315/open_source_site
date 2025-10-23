@@ -11,6 +11,7 @@ import com.sdu.open.source.site.security.JwtTokenUtil;
 import com.sdu.open.source.site.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 认证控制器
@@ -53,6 +56,9 @@ public class AuthController {
         this.redisTemplate = redisTemplate;
         this.asyncMailService = asyncMailService;
     }
+
+    @Value("${spring.constant.site-url}")
+    private String siteUrl;
 
     /**
      * 用户登录
@@ -208,6 +214,82 @@ public class AuthController {
         }
     }
 
+    // 忘记密码-发送重置邮件
+    @PostMapping("/auth/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody RequestParamDTO param) {
+        try {
+            String email = param.getForgotEmail();
+            String captchaCode = param.getCaptchaCode();
+
+            // 验证邮箱格式
+            if (!isValidEmail(email)) {
+                return ResponseEntity.ok(ApiResponse.error(400, "邮箱格式不正确"));
+            }
+
+            // todo 验证验证码（从Redis获取存储的验证码）
+            String storedCaptcha = redisTemplate.opsForValue().get(email);
+            if (storedCaptcha == null) {
+                return ResponseEntity.ok(ApiResponse.error(400, "验证码已过期，请重新获取"));
+            }
+            if (!storedCaptcha.equals(captchaCode)) {
+                return ResponseEntity.ok(ApiResponse.error(400, "验证码不正确"));
+            }
+            redisTemplate.delete(email);
+
+            // 查找用户
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                return ResponseEntity.ok(ApiResponse.success("若邮箱已注册，重置链接将发送至该邮箱"));
+            }
+
+            // 生成JWT作为重置令牌（1小时）
+            String resetToken = jwtTokenUtil.generateResetToken(user.getUsername());
+
+            // 构造重置链接（需替换为实际前端页面地址）
+            String resetUrl = siteUrl + "/reset-password?token=" + resetToken;
+
+            // 异步发送重置邮件
+            asyncMailService.asyncSendResetPasswordEmail(email, resetUrl);
+
+            return ResponseEntity.ok(ApiResponse.success("密码重置邮件已发送，请注意查收"));
+        } catch (Exception e) {
+            log.error("忘记密码流程异常", e);
+            return ResponseEntity.ok(ApiResponse.error(500, "系统繁忙，请稍后重试"));
+        }
+    }
+
+    // 验证重置令牌并重置密码
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @RequestParam("token") String token,
+            @RequestBody RequestParamDTO param) {
+        try {
+            String newPassword = param.getNewPassword();
+            String confirmPassword = param.getConfirmPassword();
+            if (!newPassword.equals(confirmPassword)) {
+                return ResponseEntity.ok(ApiResponse.error(400, "两次输入的密码不一致"));
+            }
+            // 验证JWT令牌
+            String username = jwtTokenUtil.getUsernameFromToken(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (!jwtTokenUtil.validateToken(token, userDetails) || !jwtTokenUtil.isResetToken(token)) {
+                return ResponseEntity.ok(ApiResponse.error(400, "令牌无效或已过期"));
+            }
+
+            // 获取用户名并更新密码
+            User user = userService.findByUsername(username);
+            if (user == null) {
+                return ResponseEntity.ok(ApiResponse.error(404, "用户不存在"));
+            }
+            user.setPassword(newPassword);
+            userService.updatePassword(user);
+
+            return ResponseEntity.ok(ApiResponse.success("密码重置成功，请使用新密码登录"));
+        } catch (Exception e) {
+            log.error("重置密码流程异常", e);
+            return ResponseEntity.ok(ApiResponse.error(500, "系统繁忙，请稍后重试"));
+        }
+    }
     private boolean isValidEmail(String email) {
         if (!StringUtils.hasText(email)) {
             return false;
