@@ -42,4 +42,8 @@ public interface UserDao {
     void deleteById(Long id);
 
     List<User> selectByIds(@Param("userIds") List<Long> userIds);
+
+    User selectByEmail(String email);
+
+    void updatePassword(User user);
 }

@@ -22,7 +22,9 @@ public class JwtTokenUtil {
 
     // 默认过期时间24小时
     private static final long JWT_TOKEN_VALIDITY = 24 * 60 * 60 * 1000;
-    
+    // 密码重置令牌过期时间1小时
+    private static final long RESET_TOKEN_VALIDITY = 60 * 60 * 1000;
+
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
     /**
@@ -86,7 +88,19 @@ public class JwtTokenUtil {
      */
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userDetails.getUsername());
+        return doGenerateToken(claims, userDetails.getUsername(), JWT_TOKEN_VALIDITY);
+    }
+
+    /**
+     * 生成密码重置令牌（1小时过期，带自定义声明）
+     *
+     * @param username 用户名
+     * @return 重置令牌
+     */
+    public String generateResetToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("reset_password", true); // 标记为密码重置令牌
+        return doGenerateToken(claims, username, RESET_TOKEN_VALIDITY);
     }
 
     /**
@@ -96,12 +110,12 @@ public class JwtTokenUtil {
      * @param subject 主题
      * @return 令牌
      */
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
+    private String doGenerateToken(Map<String, Object> claims, String subject, long expirationMillis) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(key)
                 .compact();
     }
@@ -116,5 +130,20 @@ public class JwtTokenUtil {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    /**
+     * 验证是否为密码重置令牌
+     *
+     * @param token 令牌
+     * @return 是否为重置令牌
+     */
+    public Boolean isResetToken(String token) {
+        try {
+            Claims claims = getAllClaimsFromToken(token);
+            return Boolean.TRUE.equals(claims.get("reset_password", Boolean.class));
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -141,4 +141,18 @@ public class UserService {
         userDao.deleteById(id);
         return true;
     }
+        /**
+         * 根据邮箱查找用户
+         *
+         * @param email 邮箱
+         * @return 用户对象
+         */
+    public User findByEmail(String email) {
+        return userDao.selectByEmail(email);
+    }
+
+    public void updatePassword(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userDao.updatePassword(user);
+    }
 }

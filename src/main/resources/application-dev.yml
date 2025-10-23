@@ -16,3 +16,6 @@ spring:
     url: jdbc:mysql://rm-bp148z5e593e5u63nvo.mysql.rds.aliyuncs.com:3306/openSourceTest?serverTimezone=UTC
     username: root
     password: Admin!@#
+
+  constant:
+    site-url: http://localhost:5173

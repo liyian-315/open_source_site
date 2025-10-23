@@ -3,6 +3,7 @@ package com.sdu.open.source.site.dto;
 import com.sdu.open.source.site.entity.CopyWriting;
 import lombok.Data;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -21,8 +22,7 @@ public class RequestParamDTO {
     private String role;
     private Boolean hasSignedPdf;
     // 备用邮箱：可选，但格式必须正确
-    @Pattern(regexp = "^$|^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$",
-            message = "备用邮箱格式不正确")
+    @Email(message = "备用邮箱格式不正确")
     private String email2;
 
     // 手机号：必填，11位有效手机号
@@ -72,4 +72,15 @@ public class RequestParamDTO {
      */
     private Integer pageNum;
     private Integer pageSize;
+
+    // 忘记密码新增字段
+    @Email(message = "邮箱格式不正确")
+    private String forgotEmail;
+    private String captchaCode;
+    @NotBlank(message = "新密码不能为空")
+    @Size(min = 6, message = "密码长度不能少于6位")
+    private String newPassword;
+
+    @NotBlank(message = "确认密码不能为空")
+    private String confirmPassword;
 }
