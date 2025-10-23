@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: liyian
@@ -24,6 +25,7 @@ public class MailMsgService {
     private final JavaMailSenderImpl mailSender;
     private final RedisTemplate<String,String> redisTemplate;
     private final EmailTemplateService emailTemplateService;
+    private static final int VERIFICATION_CODE_TIMEOUT_MINUTES = 5;
 
     public MailMsgService(JavaMailSenderImpl mailSender, RedisTemplate<String, String> redisTemplate, EmailTemplateService emailTemplateService) {
         this.mailSender = mailSender;
@@ -48,7 +50,7 @@ public class MailMsgService {
         helper.setFrom(mailUsername);
 
         // 存储验证码到Redis
-        redisTemplate.opsForValue().set(email, code, Duration.ofMinutes(60));
+        redisTemplate.opsForValue().set(email, code, VERIFICATION_CODE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
         mailSender.send(mimeMessage);
         return true;
     }

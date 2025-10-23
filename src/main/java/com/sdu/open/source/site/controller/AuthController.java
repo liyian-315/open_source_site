@@ -225,8 +225,6 @@ public class AuthController {
             if (!isValidEmail(email)) {
                 return ResponseEntity.ok(ApiResponse.error(400, "邮箱格式不正确"));
             }
-
-            // todo 验证验证码（从Redis获取存储的验证码）
             String storedCaptcha = redisTemplate.opsForValue().get(email);
             if (storedCaptcha == null) {
                 return ResponseEntity.ok(ApiResponse.error(400, "验证码已过期，请重新获取"));
