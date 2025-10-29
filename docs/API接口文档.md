@@ -1975,8 +1975,7 @@ DELETE /api/admin/delete_user?id=10
 
 ---
 
-**文档生成时间**: 2025-01-20
+**文档生成时间**: 2025-10-29
 **后端框架**: Spring Boot
 **数据库**: MySQL
-**对象存储**: MinIO
 **缓存**: Redis
