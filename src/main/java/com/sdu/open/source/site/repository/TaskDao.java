@@ -59,4 +59,6 @@ public interface TaskDao {
     );
 
     long countTaskVOByJoin(@Param("param") RequestParamDTO param  );
+
+    int insert(Task task);
 }

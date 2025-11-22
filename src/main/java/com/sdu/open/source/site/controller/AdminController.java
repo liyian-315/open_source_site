@@ -95,4 +95,20 @@ public class AdminController {
             return ResponseEntity.status(500).body("任务状态更新失败: " + e.getMessage());
         }
     }
+    @PostMapping("/admin/create_task")
+    public ResponseEntity<?> createTask(@RequestBody RequestParamDTO param) {
+        try {
+            if (param == null || param.getTaskName() == null ) {
+                return new ResponseEntity<>("参数不能为空提示", HttpStatus.BAD_REQUEST);
+            }
+            boolean success = taskService.createTaskWithClass(param);
+            if (success) {
+                return ResponseEntity.ok("任务创建成功");
+            } else {
+                return ResponseEntity.status(400).body("任务创建失败，任务类型不合法");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("任务创建失败: " + e.getMessage());
+        }
+    }
 }

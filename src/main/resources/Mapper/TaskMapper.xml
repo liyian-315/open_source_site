@@ -19,6 +19,10 @@
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
         <result column="gitee_link" property="giteeLink" jdbcType="VARCHAR"/>
     </resultMap>
+    <insert id="insert">
+        INSERT INTO task (task_name, task_class, task_protocol_id, task_description, collection_user, deadline_time, create_time, update_time, gitee_link)
+        VALUES (#{taskName}, #{taskClass}, #{taskProtocolId}, #{taskDescription}, #{collectionUser}, #{deadlineTime}, #{createTime}, #{updateTime}, #{giteeLink})
+    </insert>
 
     <!-- 根据领取人姓名查询任务 -->
     <select id="findByCollectionUser" parameterType="map" resultMap="BaseResultMap">
@@ -55,6 +59,7 @@
         </set>
         WHERE id = #{id}
     </update>
+    <update id="countTasksByParam"></update>
 
     <sql id="sqlFragment">
         <if test="taskStatus != null">task_status = #{taskStatus},</if>
