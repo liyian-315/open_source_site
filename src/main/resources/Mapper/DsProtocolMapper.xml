@@ -9,4 +9,8 @@
             #{id}
         </foreach>
     </select>
+    <select id="findAll" resultType="com.sdu.open.source.site.entity.DsProtocol">
+        SELECT *
+        FROM ds_protocol
+    </select>
 </mapper>

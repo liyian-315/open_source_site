@@ -10,4 +10,6 @@ import java.util.Set;
 @Mapper
 public interface DsProtocolDao {
     List<DsProtocol> findByIds(@Param("dsProtocolIds") Set<Long> dsProtocolIds);
+
+    List<DsProtocol> findAll();
 }

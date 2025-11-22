@@ -49,9 +49,14 @@ public class RequestParamDTO {
      * task相关
      */
     private Long taskId;
-    private Long taskUserId;
     private String taskName;
+    private Long taskClass;
+    private Long taskProtocolId;
+    private String taskDescription;
+    private String deadlineTime;
+    private String giteeLink;
     private String collectionUser;
+    private Long taskUserId;
     private Integer taskStatus;
     private Integer recogStatus;
     /**
@@ -67,7 +72,7 @@ public class RequestParamDTO {
     // 文案类型（区分PROJECT_DISPLAY/LEARNING_MATERIAL，参考CopyWritingAreas枚举）
     private String cwType;
 
-    /*
+    /**
      * 分页参数
      */
     private Integer pageNum;

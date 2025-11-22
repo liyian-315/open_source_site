@@ -24,4 +24,8 @@ public class DsProtocolService {
         }
         return dsProtocolDao.findByIds(dsProtocolIds);
     }
+
+    public List<DsProtocol> findAll() {
+        return dsProtocolDao.findAll();
+    }
 }
