@@ -13,4 +13,6 @@ public interface TaskClassDao {
     TaskClass findById(Long id);
 
     List<TaskClass> selectByIds(ArrayList<Long> longs);
+
+    int update(TaskClass taskClass);
 }
