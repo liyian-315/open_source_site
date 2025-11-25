@@ -16,12 +16,7 @@
 
     <select id="selectListByArea" parameterType="java.lang.String"
             resultType="com.sdu.open.source.site.entity.CopyWriting">
-        select id,
-               area,
-               title,
-               copy_writing_text as copyWritingText,
-               link,
-               note
+        select *
         from copy_writing
         where area = #{area}
         order by id asc
@@ -44,4 +39,19 @@
         delete from copy_writing
         where area = #{area}
     </delete>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        delete from copy_writing
+        where id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.sdu.open.source.site.entity.CopyWriting">
+        UPDATE copy_writing
+        SET area = #{area},
+            title = #{title},
+            copy_writing_text = #{copyWritingText},
+            link = #{link},
+            note = #{note}
+        WHERE id = #{id}
+    </update>
 </mapper>

@@ -168,6 +168,10 @@ public class ProjectService {
         return projectDao.selectTotalCount();
     }
 
+    public List<Project> getAllProjects() {
+        return projectDao.selectAll();
+    }
+
     @Transactional
     public boolean addNewTag(Tag tag) {
         try {

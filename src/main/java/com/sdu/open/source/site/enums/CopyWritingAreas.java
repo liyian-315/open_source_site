@@ -15,7 +15,17 @@ public enum CopyWritingAreas {
     /**
      * 学习资料区域
      */
-    LEARNING_MATERIAL("learningMaterial", "学习资料区域");
+    LEARNING_MATERIAL("learningMaterial", "学习资料区域"),
+
+    /**
+     * 首页项目展示区域
+     */
+    HOME_PROJECT_DISPLAY("homeProjectDisplay", "首页项目展示区域"),
+
+    /**
+     * 首页活动展示区域
+     */
+    HOME_EVENT_DISPLAY("homeEventDisplay", "首页活动展示区域");
 
     private final String code;
     private final String description;
@@ -25,13 +35,4 @@ public enum CopyWritingAreas {
         this.description = description;
     }
 
-    // 根据编码获取枚举值
-    public static CopyWritingAreas getByCode(String code) {
-        for (CopyWritingAreas area : CopyWritingAreas.values()) {
-            if (area.getCode().equals(code)) {
-                return area;
-            }
-        }
-        return null;
-    }
 }

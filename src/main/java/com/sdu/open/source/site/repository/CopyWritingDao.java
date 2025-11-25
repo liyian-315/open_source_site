@@ -23,4 +23,8 @@ public interface CopyWritingDao {
     void insert(CopyWriting cw);
 
     void deleteByArea(String cwArea);
+
+    void deleteById(Long id);
+
+    void update(CopyWriting cw);
 }

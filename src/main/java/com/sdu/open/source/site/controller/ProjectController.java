@@ -41,6 +41,20 @@ public class ProjectController {
         }
     }
 
+    @GetMapping("/api/admin/projects/all")
+    public ResponseEntity<List<Project>> getAllProjectsForAdmin() {
+        try {
+            List<Project> projects = projectService.getAllProjects();
+            if (projects == null || projects.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(projects, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("获取所有项目失败", e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/api/projects/{id}")
     public ResponseEntity<ProjectDetailDTO> getProjectById(@PathVariable("id") Long id) {
         try {
