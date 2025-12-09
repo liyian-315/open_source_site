@@ -15,4 +15,6 @@ public interface TaskClassDao {
     List<TaskClass> selectByIds(ArrayList<Long> longs);
 
     int update(TaskClass taskClass);
+
+    void insert(TaskClass taskClass);
 }

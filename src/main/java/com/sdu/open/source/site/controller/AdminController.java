@@ -1,12 +1,14 @@
 package com.sdu.open.source.site.controller;
 
 import com.sdu.open.source.site.dto.RequestParamDTO;
+import com.sdu.open.source.site.entity.TaskClass;
 import com.sdu.open.source.site.entity.User;
 import com.sdu.open.source.site.service.TaskService;
 import com.sdu.open.source.site.service.TaskUserService;
 import com.sdu.open.source.site.service.UserService;
 import com.sdu.open.source.site.vo.AdminTaskVO;
 import com.sdu.open.source.site.vo.PageResultVO;
+import com.sdu.open.source.site.vo.TaskEditVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -109,6 +111,65 @@ public class AdminController {
             }
         } catch (Exception e) {
             return ResponseEntity.status(500).body("任务创建失败: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/admin/task_class")
+    public ResponseEntity<?> createTaskClass(@RequestBody TaskClass taskClass) {
+        try {
+            TaskClass createdTaskClass = taskService.createTaskClass(taskClass);
+            return ResponseEntity.ok(createdTaskClass);
+        } catch (Exception e) {
+            log.error("createTaskClass error", e);
+            return ResponseEntity.internalServerError().body("createTaskClass error");
+        }
+    }
+
+    /**
+     * 查询任务编辑视图数据
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    @GetMapping("/admin/tasks_edit")
+    public ResponseEntity<?> getTasksForEdit(
+            @RequestParam(value = "pageNum", required = false, defaultValue = "1") Integer pageNum,
+            @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize
+    ) {
+        try {
+            PageResultVO<TaskEditVO> pageResult = taskService.selectTaskEditVO(pageNum, pageSize);
+            return ResponseEntity.ok(pageResult);
+        } catch (Exception e) {
+            log.error("查询任务编辑数据失败", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("查询任务编辑数据失败");
+        }
+    }
+
+    /**
+     * 更新任务信息
+     * @param taskId 任务ID
+     * @param param 请求参数
+     * @return 更新结果
+     */
+    @PutMapping("/admin/task/{taskId}")
+    public ResponseEntity<?> updateTask(
+            @PathVariable Long taskId,
+            @RequestBody RequestParamDTO param
+    ) {
+        try {
+            if (taskId == null) {
+                return ResponseEntity.badRequest().body("任务ID不能为空");
+            }
+            param.setTaskId(taskId);
+            boolean success = taskService.updateTaskInfo(param);
+            if (success) {
+                return ResponseEntity.ok("任务更新成功");
+            } else {
+                return ResponseEntity.status(400).body("任务更新失败");
+            }
+        } catch (Exception e) {
+            log.error("任务更新失败", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("任务更新失败: " + e.getMessage());
         }
     }
 }

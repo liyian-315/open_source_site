@@ -19,7 +19,8 @@
         where id = #{id}
     </select>
 
-    <insert id="insert" parameterType="com.sdu.open.source.site.entity.Project">
+    <insert id="insert" parameterType="com.sdu.open.source.site.entity.Project"
+            useGeneratedKeys="true" keyProperty="id">
         insert into projects (name, description, create_time, git_repo, project_intro, module_display)
         values (#{name}, #{description}, #{createTime}, #{gitRepo}, #{projectIntro}, #{moduleDisplay})
     </insert>

@@ -4,9 +4,7 @@ import com.sdu.open.source.site.entity.DsProtocol;
 import com.sdu.open.source.site.service.DsProtocolService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,6 +26,17 @@ public class ProtocolsController {
         } catch (Exception e) {
             log.error("getProtocols error", e);
             return ResponseEntity.internalServerError().body("getProtocols error");
+        }
+    }
+
+    @PostMapping("/admin/protocol")
+    public ResponseEntity<?> createProtocol(@RequestBody DsProtocol protocol) {
+        try {
+            DsProtocol createdProtocol = dsProtocolService.create(protocol);
+            return ResponseEntity.ok(createdProtocol);
+        } catch (Exception e) {
+            log.error("createProtocol error", e);
+            return ResponseEntity.internalServerError().body("createProtocol error");
         }
     }
 }

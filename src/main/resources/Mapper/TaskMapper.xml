@@ -62,6 +62,9 @@
     <update id="countTasksByParam"></update>
 
     <sql id="sqlFragment">
+        <if test="taskName != null">task_name = #{taskName},</if>
+        <if test="taskClass != null">task_class = #{taskClass},</if>
+        <if test="taskDescription != null">task_description = #{taskDescription},</if>
         <if test="taskStatus != null">task_status = #{taskStatus},</if>
         <!-- 新增：协议ID可更新 -->
         <if test="taskProtocolId != null">task_protocol_id = #{taskProtocolId},</if>
@@ -69,9 +72,8 @@
         <if test="collectionTime != null">collection_time = #{collectionTime},</if>
         <!-- 新增：截止时间可更新 -->
         <if test="deadlineTime != null">deadline_time = #{deadlineTime},</if>
-        <if test="updateTime != null">update_time = #{updateTime}</if>
         <if test="giteeLink != null">gitee_link = #{giteeLink},</if>
-
+        <if test="updateTime != null">update_time = #{updateTime}</if>
     </sql>
 
     <select id="countTasksByCategoryId" resultType="java.lang.Long">
@@ -166,5 +168,30 @@
                 AND tu.task_status = #{param.taskStatus}
             </if>
         </where>
+    </select>
+
+    <!-- 查询任务编辑视图数据 -->
+    <select id="selectTaskEditVO" resultType="com.sdu.open.source.site.vo.TaskEditVO">
+        SELECT
+            t.id AS taskId,
+            t.task_name AS projectName,
+            t.task_class AS taskClassId,
+            tc.name AS projectType,
+            t.task_protocol_id AS protocolId,
+            dp.title AS protocol,
+            t.gitee_link AS gitee,
+            t.task_description AS description,
+            t.deadline_time AS deadline
+        FROM
+            task t
+        LEFT JOIN task_class tc ON t.task_class = tc.id
+        LEFT JOIN ds_protocol dp ON t.task_protocol_id = dp.id
+        ORDER BY t.create_time DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+    <!-- 统计任务编辑视图的总数 -->
+    <select id="countTaskEditVO" resultType="java.lang.Long">
+        SELECT COUNT(1) FROM task
     </select>
 </mapper>

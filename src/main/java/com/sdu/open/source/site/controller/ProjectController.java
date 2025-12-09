@@ -121,26 +121,43 @@ public class ProjectController {
     }
 
     @PostMapping("/api/admin/project/createProject")
-    public ResponseEntity<Project> createProject(@RequestBody Project project) {
+    public ResponseEntity<Project> createProject(@RequestBody RequestParamDTO requestParamDTO) {
         try {
+            // 创建项目对象
+            Project project = new Project();
+            project.setName(requestParamDTO.getName());
+            project.setDescription(requestParamDTO.getDescription());
+            project.setGitRepo(requestParamDTO.getGitRepo());
+            project.setProjectIntro(requestParamDTO.getProjectIntro());
+
+            // 创建项目
             Project createdProject = projectService.createProject(project);
+
+            // 如果有标签ID，插入项目标签关联
+            if (requestParamDTO.getTagIds() != null && !requestParamDTO.getTagIds().isEmpty()) {
+                projectService.addProjectTag(createdProject.getId(), requestParamDTO.getTagIds());
+            }
+
             return new ResponseEntity<>(createdProject, HttpStatus.CREATED);
         } catch (Exception e) {
+            log.error("创建项目失败", e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/api/admin/project/addTag")
-    public ResponseEntity<Void> addTag(@RequestBody Tag tag) {
+    public ResponseEntity<Tag> addTag(@RequestBody Tag tag) {
         try {
             if (tag == null || tag.getName() == null || tag.getName().trim().isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             boolean success = projectService.addNewTag(tag);
             if (success) {
-                return new ResponseEntity<>(HttpStatus.CREATED);
+                // 返回新创建的标签（包含ID）
+                return new ResponseEntity<>(tag, HttpStatus.CREATED);
             }
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            // 标签已存在
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (Exception e) {
             log.error("添加新标签失败", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
