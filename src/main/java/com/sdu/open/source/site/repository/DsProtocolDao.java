@@ -12,4 +12,6 @@ public interface DsProtocolDao {
     List<DsProtocol> findByIds(@Param("dsProtocolIds") Set<Long> dsProtocolIds);
 
     List<DsProtocol> findAll();
+
+    void insert(DsProtocol protocol);
 }

@@ -13,4 +13,9 @@
         SELECT *
         FROM ds_protocol
     </select>
+
+    <insert id="insert" parameterType="com.sdu.open.source.site.entity.DsProtocol" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ds_protocol (title, link)
+        VALUES (#{title}, #{link})
+    </insert>
 </mapper>

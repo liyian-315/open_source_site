@@ -4,6 +4,7 @@ import com.sdu.open.source.site.dto.RequestParamDTO;
 import com.sdu.open.source.site.entity.Task;
 import com.sdu.open.source.site.entity.TaskClass;
 import com.sdu.open.source.site.vo.AdminTaskVO;
+import com.sdu.open.source.site.vo.TaskEditVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -61,4 +62,21 @@ public interface TaskDao {
     long countTaskVOByJoin(@Param("param") RequestParamDTO param  );
 
     int insert(Task task);
+
+    /**
+     * 查询任务编辑视图数据（包含项目类和协议信息）
+     * @param start 起始位置
+     * @param pageSize 每页大小
+     * @return 任务编辑VO列表
+     */
+    List<TaskEditVO> selectTaskEditVO(
+            @Param("start") int start,
+            @Param("pageSize") int pageSize
+    );
+
+    /**
+     * 统计任务编辑视图的总数
+     * @return 总数
+     */
+    long countTaskEditVO();
 }

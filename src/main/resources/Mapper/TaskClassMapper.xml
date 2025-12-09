@@ -25,4 +25,9 @@
             #{classId}
         </foreach>
     </select>
+
+    <insert id="insert" parameterType="com.sdu.open.source.site.entity.TaskClass" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO task_class (name, description, taskCount)
+        VALUES (#{name}, #{description}, #{taskCount})
+    </insert>
 </mapper>

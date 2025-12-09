@@ -20,7 +20,8 @@
         where pt.project_id = #{projectId}
     </select>
 
-    <insert id="insert" parameterType="com.sdu.open.source.site.entity.Tag">
+    <insert id="insert" parameterType="com.sdu.open.source.site.entity.Tag"
+            useGeneratedKeys="true" keyProperty="id">
         insert into tags (name)
         values (#{name})
     </insert>

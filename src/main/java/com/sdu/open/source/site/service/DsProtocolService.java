@@ -28,4 +28,9 @@ public class DsProtocolService {
     public List<DsProtocol> findAll() {
         return dsProtocolDao.findAll();
     }
+
+    public DsProtocol create(DsProtocol protocol) {
+        dsProtocolDao.insert(protocol);
+        return protocol;
+    }
 }
