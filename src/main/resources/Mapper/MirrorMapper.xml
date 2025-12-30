@@ -17,4 +17,43 @@
             </if>
         </where>
     </select>
+
+    <insert id="insertMirror" parameterType="com.sdu.open.source.site.entity.Mirror" useGeneratedKeys="true" keyProperty="id">
+        insert into mirror (name, url_inter, url_out, size, time, arch, manufacturer, series)
+        values (#{name}, #{urlInter}, #{urlOut}, #{size}, #{time}, #{arch}, #{manufacturer}, #{series})
+    </insert>
+
+    <update id="updateMirror" parameterType="com.sdu.open.source.site.entity.Mirror">
+        update mirror
+        set name = #{name},
+            url_inter = #{urlInter},
+            url_out = #{urlOut},
+            size = #{size},
+            time = #{time},
+            arch = #{arch},
+            manufacturer = #{manufacturer},
+            series = #{series}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMirror">
+        delete from mirror
+        where id = #{id}
+    </delete>
+
+    <select id="countBySeriesAndArch" resultType="int">
+        select count(*)
+        from mirror
+        where series = #{series}
+        and arch = #{arch}
+    </select>
+
+    <select id="checkMirrorExists" resultType="int">
+        select count(*)
+        from mirror
+        where name = #{name}
+        <if test="excludeId != null">
+            and id != #{excludeId}
+        </if>
+    </select>
 </mapper>

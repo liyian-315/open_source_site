@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class Menu {
     private Long id;
-    private String level;
+    private Long level;  // 父级目录的ID，一级目录为0
     private String title;
     private String description;
     private String url;
