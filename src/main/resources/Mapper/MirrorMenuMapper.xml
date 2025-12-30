@@ -2,8 +2,45 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sdu.open.source.site.repository.MirrorMenuDao">
 
-    <select id="selectAll" parameterType="com.sdu.open.source.site.entity.Menu" resultType="com.sdu.open.source.site.entity.Menu">
+    <select id="selectAll" resultType="com.sdu.open.source.site.entity.Menu">
         select *
         from mirror_menu
+    </select>
+
+    <select id="selectByParentId" resultType="com.sdu.open.source.site.entity.Menu">
+        select *
+        from mirror_menu
+        where level = #{parentId}
+    </select>
+
+    <select id="selectById" resultType="com.sdu.open.source.site.entity.Menu">
+        select *
+        from mirror_menu
+        where id = #{id}
+    </select>
+
+    <insert id="insertDevice" parameterType="com.sdu.open.source.site.entity.Menu" useGeneratedKeys="true" keyProperty="id">
+        insert into mirror_menu (level, title)
+        values (#{level}, #{title})
+    </insert>
+
+    <update id="updateDevice" parameterType="com.sdu.open.source.site.entity.Menu">
+        update mirror_menu
+        set title = #{title}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDevice">
+        delete from mirror_menu
+        where id = #{id}
+    </delete>
+
+    <select id="checkDeviceExists" resultType="int">
+        select count(*)
+        from mirror_menu
+        where title = #{title}
+        <if test="excludeId != null">
+            and id != #{excludeId}
+        </if>
     </select>
 </mapper>

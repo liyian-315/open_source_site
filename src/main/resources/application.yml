@@ -17,6 +17,8 @@ minio:
   secret-key: YKf9MtQ7FgRnylgjRPpdB5ZwN6jWsc7E2WDFdRlY
   bucket: dongshan-shixirespdf
   public-url: https://riscv-cn.org/sduproxy
+  # 镜像文件上传的目录前缀
+  mirror-bucket: dongshan-img
 
 spring:
 #  profiles:
@@ -25,9 +27,10 @@ spring:
     multipart:
       enabled: true
       # 单个文件大小上限
-      max-file-size: 50MB
-      # 整个请求（多个文件之和）上限
-      max-request-size: 200MB
+      max-file-size: 10240MB
+      # 单次请求最大大小
+      max-request-size: 10240MB
+      file-size-threshold: 10MB
       # 懒解析（到真正访问文件流时再解析，有利于异常处理）
       resolve-lazily: true
   mail:
