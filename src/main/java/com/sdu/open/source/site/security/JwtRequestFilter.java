@@ -35,6 +35,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        log.info("URI = {}", request.getRequestURI());
 
         String[] publicUrls = {"/api/auth/**", "/api/public/**"};
         AntPathMatcher pathMatcher = new AntPathMatcher();
